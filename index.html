@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aaron Lad — Computer Science @ University of Alberta. Interactive 3D portfolio." />
+  <title>Aaron Lad — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ── Three.js Canvas (full-viewport, behind all overlays) ─────────────── -->
+  <canvas id="portfolio-canvas"></canvas>
+
+  <!-- ── Planet name labels (positioned each frame via JS) ──────────────── -->
+  <div id="planet-labels"></div>
+
+  <!-- ── Moon name labels (shown when a planet is focused) ──────────────── -->
+  <div id="moon-labels"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       HUD OVERLAYS
+       All HUD elements are pointer-events:none so they don't block 3D clicks
+  ══════════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Top-left: identity -->
+  <div id="hud-top-left">
+    <span class="hud-title">AARON LAD</span>
+    <span class="hud-subtitle">CS @ University of Alberta</span>
+  </div>
+
+  <!-- Top-right: status + current planet -->
+  <div id="hud-top-right">
+    <span class="hud-status">● COMMS ONLINE</span>
+    <span id="hud-planet-name"></span>
+  </div>
+
+  <!-- Bottom-centre: instructions -->
+  <div id="hud-bottom">
+    <span>ORBITAL MECHANICS: INITIALIZED</span>
+    <span id="hud-instructions">CLICK PLANET TO EXPLORE &nbsp;·&nbsp; SCROLL TO ZOOM &nbsp;·&nbsp; DRAG TO ROTATE &nbsp;·&nbsp; ESC TO RESET</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       INTERACTIVE UI ELEMENTS
+  ══════════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Hover tooltip (follows cursor) -->
+  <div id="tooltip"></div>
+
+  <!-- Back-to-overview button (shown when a planet is focused) -->
+  <button id="back-btn" class="hidden">&#9668; BACK TO OVERVIEW</button>
+
+  <!-- ── Info Panel (slides in from right on moon click) ───────────────── -->
+  <div id="info-panel" class="hidden" role="dialog" aria-label="Moon information">
+
+    <!-- Close button -->
+    <button id="panel-close" aria-label="Close panel">&times;</button>
+
+    <!-- Optional screenshot / project image -->
+    <div id="panel-image-container" style="display:none;">
+      <img id="panel-image" src="" alt="" />
+    </div>
+
+    <!-- Content -->
+    <div id="panel-content">
+      <div id="panel-tags"></div>
+      <h2 id="panel-title"></h2>
+      <h3 id="panel-subtitle"></h3>
+      <p  id="panel-description"></p>
+      <a  id="panel-link" href="#" target="_blank" rel="noopener noreferrer"
+          style="display:none;">OPEN LINK &#8599;</a>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       LOADING SCREEN
+  ══════════════════════════════════════════════════════════════════════════ -->
+  <div id="loading-screen">
+    <div class="loading-text">INITIALIZING ORBITAL SYSTEMS...</div>
+    <div class="loading-bar">
+      <div class="loading-progress"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       SCRIPTS — CDN dependencies first, then application modules
+  ══════════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Three.js r128 core -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- OrbitControls (adds THREE.OrbitControls to the THREE namespace) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- TWEEN.js for smooth camera animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+
+  <!-- Application modules (order matters: data → visuals → controls → entry) -->
+  <script src="js/planet-data.js"></script>
+  <script src="js/solar-system.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/interactions.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"\nconst fs = require\\('fs'\\);\n// Wrap in a function to parse class syntax\nconst src = 'const _test = ' + fs.readFileSync\\('C:/Users/AARON/portfolio_website/js/ui.js','utf8'\\).replace\\('class UIController', 'class UIController'\\) + '; console.log\\(\\\\\"ui.js syntax OK\\\\\"\\);';\n// Actually just check parse by wrapping\ntry {\n  new Function\\(fs.readFileSync\\('C:/Users/AARON/portfolio_website/js/ui.js','utf8'\\)\\);\n  console.log\\('ui.js: no syntax errors'\\);\n} catch\\(e\\) {\n  console.error\\('ui.js ERROR:', e.message\\);\n}\n\")"
+    ]
+  }
+}

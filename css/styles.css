@@ -1,0 +1,513 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   styles.css — Aaron Lad Portfolio
+   All UI overlay styles: HUD, info panel, tooltip, back button, loading screen
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Reset & Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  margin:     0;
+  padding:    0;
+  box-sizing: border-box;
+}
+
+:root {
+  --green:        #00ff88;
+  --green-dim:    rgba(0, 255, 136, 0.12);
+  --green-glow:   0 0 10px rgba(0, 255, 136, 0.55), 0 0 30px rgba(0, 255, 136, 0.15);
+  --panel-bg:     rgba(0, 4, 20, 0.97);
+  --panel-border: rgba(0, 255, 136, 0.18);
+  --font-mono:    'Space Mono', 'Courier New', monospace;
+  --font-sans:    'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+html, body {
+  width:    100%;
+  height:   100%;
+  overflow: hidden;
+  background: #000005 !important;
+}
+
+/* ── Canvas ───────────────────────────────────────────────────────────────── */
+#portfolio-canvas {
+  display:        block;
+  position:       fixed;
+  inset:          0;
+  width:          100vw;
+  height:         100vh;
+  pointer-events: auto !important;
+  background:     #000005;
+}
+
+/* ── HUD — shared ─────────────────────────────────────────────────────────── */
+#hud-top-left,
+#hud-top-right,
+#hud-bottom {
+  position:       fixed;
+  z-index:        100;
+  pointer-events: none;
+  font-family:    var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color:          var(--green);
+  font-size:      10px;
+  line-height:    1.6;
+  text-shadow:    var(--green-glow);
+  user-select:    none;
+}
+
+/* Scanline decoration on HUD edges */
+#hud-top-left::before,
+#hud-top-right::before {
+  content:      '';
+  display:      block;
+  height:       1px;
+  background:   linear-gradient(90deg, var(--green), transparent);
+  margin-bottom: 8px;
+  opacity:      0.5;
+  box-shadow:   var(--green-glow);
+}
+
+/* ── HUD Top-Left ─────────────────────────────────────────────────────────── */
+#hud-top-left {
+  top:  22px;
+  left: 24px;
+}
+
+.hud-title {
+  display:       block;
+  font-size:     18px;
+  font-weight:   700;
+  letter-spacing: 0.28em;
+  text-shadow:   0 0 20px rgba(0, 255, 136, 0.8), 0 0 40px rgba(0, 255, 136, 0.3);
+}
+
+.hud-subtitle {
+  display:       block;
+  font-size:     10px;
+  opacity:       0.65;
+  letter-spacing: 0.2em;
+  margin-top:    3px;
+}
+
+/* ── HUD Top-Right ────────────────────────────────────────────────────────── */
+#hud-top-right {
+  top:         22px;
+  right:       24px;
+  text-align:  right;
+}
+
+.hud-status {
+  display:       block;
+  font-size:     10px;
+  letter-spacing: 0.2em;
+  animation:    hud-blink 2.6s ease-in-out infinite;
+}
+
+.hud-planet-label {
+  display:       block;
+  font-size:     16px;
+  font-weight:   700;
+  letter-spacing: 0.26em;
+  margin-top:    8px;
+  text-shadow:   0 0 16px currentColor, 0 0 32px currentColor;
+}
+
+.hud-planet-cat {
+  display:       block;
+  font-size:     9px;
+  opacity:       0.55;
+  letter-spacing: 0.18em;
+}
+
+/* ── HUD Bottom-Center ────────────────────────────────────────────────────── */
+#hud-bottom {
+  bottom:     22px;
+  left:       50%;
+  transform:  translateX(-50%);
+  text-align: center;
+  font-size:  9px;
+  opacity:    0.5;
+  white-space: nowrap;
+}
+
+#hud-bottom span {
+  display: block;
+}
+
+/* ── Blink animation for "COMMS ONLINE" ────────────────────────────────────── */
+@keyframes hud-blink {
+  0%, 80%, 100% { opacity: 1; }
+  90%           { opacity: 0.25; }
+}
+
+/* ── Back Button ──────────────────────────────────────────────────────────── */
+#back-btn {
+  position:       fixed;
+  top:            22px;
+  left:           50%;
+  transform:      translateX(-50%);
+  z-index:        200;
+  background:     rgba(0, 255, 136, 0.05);
+  color:          var(--green);
+  border:         1px solid rgba(0, 255, 136, 0.5);
+  padding:        8px 28px;
+  font-family:    var(--font-mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor:         pointer;
+  font-size:      10px;
+  transition:     background 0.2s, box-shadow 0.2s, border-color 0.2s;
+  text-shadow:    var(--green-glow);
+  backdrop-filter: blur(8px);
+}
+
+#back-btn:hover {
+  background:   rgba(0, 255, 136, 0.12);
+  box-shadow:   var(--green-glow), inset 0 0 20px rgba(0, 255, 136, 0.05);
+  border-color: var(--green);
+}
+
+#back-btn.hidden {
+  display: none;
+}
+
+/* ── Tooltip ──────────────────────────────────────────────────────────────── */
+#tooltip {
+  position:       fixed;
+  z-index:        300;
+  pointer-events: none;
+  background:     rgba(0, 4, 18, 0.92);
+  color:          var(--green);
+  border:         1px solid rgba(0, 255, 136, 0.45);
+  padding:        5px 14px;
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity:        0;
+  transition:     opacity 0.15s ease;
+  white-space:    nowrap;
+  text-shadow:    var(--green-glow);
+  backdrop-filter: blur(10px);
+  box-shadow:     0 0 16px rgba(0, 255, 136, 0.1);
+}
+
+/* ── Planet Labels (always-on floating names) ─────────────────────────────── */
+#planet-labels {
+  position:       fixed;
+  inset:          0;
+  pointer-events: none;
+  z-index:        60;
+}
+
+.planet-label {
+  position:        absolute;
+  transform:       translate(-50%, -100%);
+  pointer-events:  none;
+  white-space:     nowrap;
+  text-align:      center;
+  transition:      opacity 0.4s ease;
+  background:      rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  border:          1px solid color-mix(in srgb, var(--planet-color, #fff) 60%, transparent);
+  border-radius:   4px;
+  padding:         5px 10px;
+}
+
+.pl-name {
+  display:        block;
+  font-family:    var(--font-mono);
+  font-size:      11px;
+  font-weight:    600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color:          var(--planet-color, #fff);
+}
+
+.pl-cat {
+  display:        block;
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color:          rgba(255, 255, 255, 0.5);
+}
+
+/* ── Moon Labels (shown when planet is focused) ───────────────────────────── */
+#moon-labels {
+  position:       fixed;
+  inset:          0;
+  pointer-events: none;
+  z-index:        65;
+}
+
+.moon-label {
+  position:        absolute;
+  transform:       translate(-50%, -100%);
+  pointer-events:  none;
+  white-space:     nowrap;
+  text-align:      center;
+  transition:      opacity 0.3s ease;
+  font-family:     var(--font-mono);
+  font-size:       8px;
+  font-weight:     700;
+  letter-spacing:  0.2em;
+  text-transform:  uppercase;
+  color:           var(--moon-color, #fff);
+  text-shadow:     0 0 8px var(--moon-color, #fff);
+  padding:         2px 10px;
+  border:          1px solid var(--moon-color, #fff);
+  background:      rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  max-width:       160px;
+  overflow:        hidden;
+  text-overflow:   ellipsis;
+  opacity:         0;
+}
+
+/* ── Info Panel ───────────────────────────────────────────────────────────── */
+#info-panel {
+  position:       fixed;
+  right:          0;
+  top:            0;
+  height:         100%;
+  width:          min(480px, 94vw);
+  z-index:        150;
+  background:     var(--panel-bg);
+  border-left:    1px solid var(--panel-border);
+  transform:      translateX(100%);
+  transition:     transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y:     auto;
+  overflow-x:     hidden;
+  padding:        72px 32px 48px;
+  font-family:    var(--font-sans);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,255,136,0.2) transparent;
+  pointer-events: none;
+  backdrop-filter: blur(20px);
+  /* top accent bar via --accent CSS variable */
+  --accent: #00ff88;
+}
+
+/* Colored top accent stripe */
+#info-panel::before {
+  content:    '';
+  display:    block;
+  position:   absolute;
+  top:        0;
+  left:       0;
+  right:      0;
+  height:     3px;
+  background: linear-gradient(90deg, var(--accent), transparent 70%);
+  z-index:    1;
+  box-shadow: 0 0 20px var(--accent);
+}
+
+#info-panel.open {
+  transform:      translateX(0);
+  pointer-events: auto;
+}
+
+#info-panel.hidden {
+  visibility:     hidden;
+  pointer-events: none;
+}
+
+#info-panel.open.hidden {
+  visibility:     visible;
+  pointer-events: auto;
+}
+
+/* Custom scrollbar for panel (Webkit) */
+#info-panel::-webkit-scrollbar       { width: 4px; }
+#info-panel::-webkit-scrollbar-track { background: transparent; }
+#info-panel::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.2); border-radius: 2px; }
+
+/* Close button */
+#panel-close {
+  position:    absolute;
+  top:         20px;
+  right:       20px;
+  background:  rgba(255,255,255,0.04);
+  border:      1px solid rgba(255,255,255,0.15);
+  color:       rgba(255,255,255,0.6);
+  width:       32px;
+  height:      32px;
+  display:     flex;
+  align-items: center;
+  justify-content: center;
+  cursor:      pointer;
+  font-size:   18px;
+  font-family: var(--font-sans);
+  font-weight: 300;
+  transition:  background 0.15s, color 0.15s, border-color 0.15s;
+  z-index:     10;
+  border-radius: 4px;
+}
+
+#panel-close:hover {
+  background:   rgba(255,255,255,0.1);
+  color:        #fff;
+  border-color: rgba(255,255,255,0.35);
+}
+
+/* Panel image */
+#panel-image-container {
+  width:         100%;
+  margin-bottom: 20px;
+  border:        1px solid rgba(255,255,255,0.08);
+  overflow:      hidden;
+  border-radius: 6px;
+}
+
+#panel-image {
+  width:   100%;
+  display: block;
+  filter:  brightness(0.9) contrast(1.05);
+}
+
+/* Tags */
+#panel-tags {
+  display:    flex;
+  flex-wrap:  wrap;
+  gap:        6px;
+  margin-bottom: 16px;
+}
+
+.panel-tag {
+  font-family:    var(--font-mono);
+  font-size:      8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color:          var(--green);
+  border:         1px solid rgba(0,255,136,0.35);
+  padding:        3px 10px;
+  border-radius:  100px;
+  background:     rgba(0,255,136,0.05);
+}
+
+/* Panel title */
+#panel-title {
+  font-family:    var(--font-mono);
+  font-size:      19px;
+  font-weight:    700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color:          var(--green);
+  margin-bottom:  8px;
+  line-height:    1.3;
+}
+
+/* Panel subtitle */
+#panel-subtitle {
+  font-family:    var(--font-sans);
+  font-size:      12px;
+  font-weight:    500;
+  color:          rgba(180, 220, 200, 0.7);
+  letter-spacing: 0.03em;
+  margin-bottom:  18px;
+}
+
+/* Divider line under subtitle */
+#panel-subtitle::after {
+  content:    '';
+  display:    block;
+  height:     1px;
+  background: linear-gradient(90deg, rgba(0,255,136,0.2), transparent);
+  margin-top: 14px;
+}
+
+/* Panel body text */
+#panel-description {
+  font-family:  var(--font-sans);
+  font-size:    13.5px;
+  font-weight:  400;
+  color:        rgba(210, 230, 220, 0.85);
+  line-height:  1.75;
+  letter-spacing: 0.01em;
+  margin-bottom: 24px;
+}
+
+/* Panel CTA link */
+#panel-link {
+  display:        inline-block;
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color:          var(--green);
+  border:         1px solid rgba(0,255,136,0.4);
+  padding:        8px 20px;
+  text-decoration: none;
+  transition:     background 0.2s, box-shadow 0.2s;
+  border-radius:  4px;
+}
+
+#panel-link:hover {
+  background:  var(--green-dim);
+  box-shadow:  var(--green-glow);
+}
+
+/* ── Loading Screen ───────────────────────────────────────────────────────── */
+#loading-screen {
+  position:        fixed;
+  inset:           0;
+  background:      #000008;
+  z-index:         1000;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             28px;
+  transition:      opacity 0.8s ease;
+  pointer-events:  none;
+}
+
+#loading-screen.fade-out {
+  opacity:        0;
+  pointer-events: none;
+}
+
+.loading-text {
+  font-family:    var(--font-mono);
+  font-size:      12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color:          var(--green);
+  text-shadow:    var(--green-glow);
+  animation:      loading-pulse 1.4s ease-in-out infinite;
+}
+
+.loading-bar {
+  width:         220px;
+  height:        2px;
+  background:    rgba(0,255,136,0.12);
+  overflow:      hidden;
+}
+
+.loading-progress {
+  height:     100%;
+  background: linear-gradient(90deg, #00ff88, #00ccff);
+  box-shadow: var(--green-glow);
+  animation:  loading-fill 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes loading-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+@keyframes loading-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* ── Responsive: narrow viewports ────────────────────────────────────────── */
+@media (max-width: 540px) {
+  #hud-top-left  { font-size: 8px; top: 12px; left: 12px; }
+  #hud-top-right { font-size: 8px; top: 12px; right: 12px; }
+  #hud-bottom    { font-size: 8px; bottom: 12px; }
+  #info-panel    { width: 100vw; border-left: none; border-top: 1px solid var(--panel-border); }
+  .hud-title     { font-size: 14px; }
+  .pl-name       { font-size: 9px; }
+}
