@@ -6,8 +6,9 @@
   <title>Aaron Lad · Full-Stack Developer &amp; IT, Edmonton</title>
   <meta name="description" content="Aaron Lad: full-stack developer in Edmonton with hands-on IT and sysadmin experience. Computing Science, University of Alberta. Open to new-grad roles and freelance web projects.">
   <link rel="canonical" href="https://amlad15.github.io/aaron-profile/">
-  <meta name="theme-color" content="#0B1020">
-  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#F3F0E8" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
 
   <!-- Link previews need absolute URLs; relative ones break on LinkedIn/Slack -->
   <meta property="og:type" content="website">
@@ -30,303 +31,450 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+  <!-- Fonts load without blocking first paint; text shows in the fallback stack and swaps in -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Public+Sans:wght@400;500;600&amp;display=swap"></noscript>
   <link rel="stylesheet" href="css/site.css">
-  <script>document.documentElement.classList.add('js');</script><!-- set before paint so the mobile menu never flashes open -->
+  <script>
+    /* Runs before paint: no flash of the wrong theme, and the mobile menu never flashes open */
+    document.documentElement.classList.add('js');
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header">
     <nav class="wrap nav" aria-label="Primary">
-      <a class="brand" href="#top">Aaron Lad</a>
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>Aaron Lad</a>
+      <button type="button" class="theme-toggle" data-theme-toggle hidden>
+        <span class="theme-toggle-label">Light</span><span class="sr-only"> theme</span>
+      </button>
       <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="nav-menu">
         <span class="menu-icon" aria-hidden="true"></span><span class="menu-label">Menu</span>
       </button>
       <ul id="nav-menu" class="nav-menu">
 <!-- build:nav -->
-<li><a href="#experience">Experience</a></li><li><a href="#services">Services</a></li><li><a href="#projects">Projects</a></li><li><a href="#skills">Skills</a></li><li><a href="#education">Education</a></li><li hidden data-cert-nav><a href="#certificates">Certificates</a></li><li><a href="#about">About</a></li><li><a href="#contact">Contact</a></li>
+<li><a href="#experience">Experience</a></li><li><a href="#services">Services</a></li><li><a href="#projects">Projects</a></li><li><a href="#skills">Skills</a></li><li><a href="#education">Education</a></li><li data-cert-nav hidden><a href="#certificates">Certificates</a></li><li><a href="#about">About</a></li><li><a href="#contact">Contact</a></li>
 <!-- /build:nav -->
       </ul>
     </nav>
   </header>
 
-  <main id="main" tabindex="-1" data-content-hash="6c7786d">
+  <main id="main" tabindex="-1" data-content-hash="e03bca0">
 <!-- build:main -->
 
 <section id="top" class="hero" aria-labelledby="hero-title">
-  <div class="hero-sky" aria-hidden="true">
-    <svg class="orbit" viewBox="0 0 600 600"><circle cx="300" cy="300" r="220"/><circle cx="300" cy="300" r="290"/><circle class="orbit-dot" cx="520" cy="300" r="5"/></svg>
-  </div>
-  <div class="wrap hero-inner">
-    <p class="eyebrow">Edmonton, Alberta, Canada</p>
-    <h1 id="hero-title">Aaron Lad</h1>
-    <p class="pitch">Full-stack developer with hands-on IT and sysadmin experience, open to new-grad roles and freelance web projects.</p>
-    
-    <div class="actions">
-      <a class="btn btn--primary" href="assets/AaronCV.pdf"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5"/></svg>Resume <span class="sr-note">(PDF)</span></a>
-      <a class="btn" href="https://github.com/amlad15"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>GitHub</a>
-      <a class="btn" href="https://www.linkedin.com/in/aaron-lad-80070625b"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></svg>LinkedIn</a>
-      <a class="btn" href="mailto:ladaaron15@gmail.com"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 5h18v14H3zM3 6l9 7 9-7"/></svg>Email</a>
-    </div>
-    <button type="button" class="link-3d" data-open-3d hidden>Explore this portfolio in 3D <span aria-hidden="true">→</span></button>
-  </div>
-</section>
-
-<section id="experience" class="section" aria-labelledby="experience-title">
-  <div class="wrap">
-    <header class="section-head"><h2 id="experience-title">Experience</h2></header>
-    <ol class="timeline">
-    <li>
-      <article id="experience/aerocool" class="job">
-        <header>
-          <h3>IT Consultant <span class="job-type">Part-time contract</span></h3>
-          <p class="job-org">Aerocool System Air Solutions Ltd.</p>
-          <p class="meta">Sep 2026 – Present · Edmonton, AB</p>
-        </header>
-        <ul class="bullets"><li>Sole technical contact for the company&#39;s web, email and marketing infrastructure.</li><li>Built their Canadian website, aerocool.ca, with WordPress and Elementor.</li><li>Manage their Google Business Profile and Google Ads, and set up their Meta Page and ads.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>WordPress</li><li>Elementor</li><li>Google Ads</li><li>Google Business Profile</li><li>Meta Ads</li></ul>
-        <a class="text-link" href="https://aerocool.ca">aerocool.ca<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
-      </article>
-    </li>
-    <li>
-      <article id="experience/guidepost" class="job">
-        <header>
-          <h3>Junior Sysadmin <span class="job-type">Internship</span></h3>
-          <p class="job-org">GuidePost Technologies Inc. <span class="muted">· Managed IT services provider</span></p>
-          <p class="meta">Apr 2026 – Aug 2026 · Edmonton, AB</p>
-        </header>
-        <ul class="bullets"><li>Provisioned and managed Microsoft 365 accounts, licensing and access across multiple client tenants.</li><li>Deployed and configured hardware for client environments, including laptop imaging and asset setup.</li><li>Resolved MSP support tickets spanning Intune compliance, firewall SSL inspection errors, Windows configuration issues and VM provisioning.</li><li>Configured an internal Certificate Authority (AD CS) for HTTPS on internal domains; performed Wi-Fi site surveys and network troubleshooting with Wireshark.</li><li>Wrote PowerShell automation for Azure AD/AD administration, including one-click device provisioning (domain disjoin, RMM agent install, user creation, restart).</li><li>Managed IAM access and Proofpoint email security configuration across client accounts.</li><li>Supported marketing operations: SEO content, Google Ads and client communications.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>Microsoft 365</li><li>Intune</li><li>PowerShell</li><li>Azure AD</li><li>AD CS</li><li>Proofpoint</li><li>Wireshark</li><li>IAM</li></ul>
-        
-      </article>
-    </li>
-    <li>
-      <article id="experience/unconventional" class="job">
-        <header>
-          <h3>Partner &amp; Head of Web Development</h3>
-          <p class="job-org">Unconventional Media Canada</p>
-          <p class="meta">Dec 2024 – Aug 2025 · Canada</p>
-        </header>
-        <ul class="bullets"><li>Led full-stack web development for 12+ client businesses across 5 industries, delivering responsive, accessible websites with a 2-week average turnaround.</li><li>Managed and mentored a team of 3 developers, enforcing code quality standards and WCAG accessibility compliance across 100% of client deadlines.</li><li>Drove 30%+ revenue growth through targeted outreach and long-term client relationships, helping the company reach profitability within 6 months.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>Full-Stack</li><li>Team Lead</li><li>Web Development</li><li>Client Management</li></ul>
-        
-      </article>
-    </li>
-    <li>
-      <article id="experience/hydrotec" class="job job--compact">
-        <header>
-          <h3>Administrative &amp; Customer Acquisition Associate</h3>
-          <p class="job-org">Hydrotec International L.L.C.</p>
-          <p class="meta">Jan – Mar 2021 · May 2022 · Oman</p>
-        </header>
-        <ul class="bullets"><li>Qualified 50+ business leads and built a 120+ company prospect database that supported 3 closed deals; wrote 10+ outreach templates adopted company-wide.</li><li>Ran logistics for a 100+ attendee corporate event and maintained a 200+ contact CRM.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>Sales</li><li>Lead Generation</li><li>CRM</li><li>Operations</li></ul>
-        
-      </article>
-    </li></ol>
-  </div>
-</section>
-
-<section id="services" class="section section--alt" aria-labelledby="services-title">
-  <div class="wrap">
-    <header class="section-head"><h2 id="services-title">Freelance &amp; Services</h2><p class="lede">I build websites and set up digital marketing for small businesses in Edmonton and across Alberta.</p></header>
-    <ul class="offerings"><li><h3>Websites</h3><p>Responsive, accessible business websites in WordPress/Elementor or custom code.</p></li><li><h3>Google presence</h3><p>Google Business Profile setup and upkeep, plus Google Ads campaigns.</p></li><li><h3>Social ads</h3><p>Meta (Facebook/Instagram) Page setup and ad campaigns.</p></li><li><h3>Ongoing tech support</h3><p>One point of contact for your website, email and marketing tools.</p></li></ul>
-    <article id="services/aerocool-case" class="case">
-      <div class="shot shot--empty" aria-hidden="true"><span>aerocool.ca</span></div>
-      <div class="case-body">
-        <p class="eyebrow">Case study · HVAC · Edmonton</p>
-        <h3>aerocool.ca <span class="muted">for Aerocool System Air Solutions</span></h3>
-        <ul class="bullets"><li>Built the Canadian website in WordPress with Elementor.</li><li>Set up and manage the Google Business Profile and Google Ads.</li><li>Set up the Meta Page and ads.</li><li>Ongoing sole technical contact for web, email and marketing.</li></ul>
-        <a class="text-link" href="https://aerocool.ca">Visit aerocool.ca<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
-      </div>
-    </article>
-    <p class="track">As Partner &amp; Head of Web Development at Unconventional Media Canada I led 12+ client websites across 5 industries, with a 2-week average turnaround and WCAG accessibility on every project.</p>
-    <a class="btn btn--primary btn--lg" href="mailto:ladaaron15@gmail.com?subject=Website%20project"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 5h18v14H3zM3 6l9 7 9-7"/></svg>Start a project</a>
-  </div>
-</section>
-
-<section id="projects" class="section" aria-labelledby="projects-title">
-  <div class="wrap">
-    <header class="section-head"><h2 id="projects-title">Projects</h2></header>
-    <div class="projects-grid">
-    <article id="projects/gcid" class="project project--featured">
-      <div class="shot shot--empty" aria-hidden="true"><span>Global Conflict Intelligence Dashboard</span></div>
-      <div class="project-body">
-        <h3>Global Conflict Intelligence Dashboard <a class="permalink" href="#projects/gcid" aria-label="Link to Global Conflict Intelligence Dashboard"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
-        <p class="meta">Jan – Mar 2026</p>
-        <p class="project-summary">Real-time OSINT map of live aircraft, ships, conflict events and breaking news.</p>
-        <ul class="bullets"><li>Integrated 4 external APIs (OpenSky, AISStream, ACLED, GDELT) with WebSocket streaming for sub-second live updates.</li><li>PostGIS spatial queries and anomaly detection across 200+ daily events.</li><li>Local Ollama LLM writes geopolitical intelligence summaries at zero API cost.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>Next.js</li><li>TypeScript</li><li>Node.js</li><li>PostgreSQL</li><li>PostGIS</li><li>Socket.IO</li><li>Leaflet.js</li><li>Ollama</li><li>Docker</li></ul>
-        <div class="actions"><a class="btn btn--sm" href="https://github.com/amlad15/Global-Conflict-Intelligence-Dashboard"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>Code</a></div>
-      </div>
-    </article>
-    <article id="projects/deepforge" class="project project--featured">
-      <div class="shot shot--empty" aria-hidden="true"><span>DeepForge</span></div>
-      <div class="project-body">
-        <h3>DeepForge <a class="permalink" href="#projects/deepforge" aria-label="Link to DeepForge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
-        <p class="meta">Feb 2026</p>
-        <p class="project-summary">Multi-agent AI system that simulates a small software engineering team.</p>
-        <ul class="bullets"><li>Four CrewAI agents (Planner, Coder, Reviewer, Builder) each own one stage of development.</li><li>Runs fully locally on Ollama with DeepSeek Coder, with no external API dependency.</li><li>Explores prompt engineering, agent coordination and end-to-end automated pipelines.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>Python</li><li>CrewAI</li><li>Ollama</li><li>DeepSeek Coder</li><li>AI Agents</li><li>Prompt Engineering</li></ul>
-        <div class="actions"><a class="btn btn--sm" href="https://github.com/amlad15/DeepForge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>Code</a></div>
-      </div>
-    </article>
-    <article id="projects/yt-spotify" class="project project--featured">
-      <div class="shot shot--empty" aria-hidden="true"><span>YT-Spotify Playlist Converter</span></div>
-      <div class="project-body">
-        <h3>YT-Spotify Playlist Converter <a class="permalink" href="#projects/yt-spotify" aria-label="Link to YT-Spotify Playlist Converter"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
-        <p class="meta">Mar 2026</p>
-        <p class="project-summary">Paste a playlist URL, sign in, and it&#39;s recreated on the other service in under 30 seconds.</p>
-        <ul class="bullets"><li>Dual OAuth via NextAuth.js keeps Spotify and Google tokens live at the same time without session conflicts.</li><li>Fuzzy title matching reaches 85%+ song match accuracy across varied playlists.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>Next.js 14</li><li>TypeScript</li><li>Spotify API</li><li>YouTube API</li><li>NextAuth.js</li><li>OAuth</li><li>Vercel</li></ul>
-        
-      </div>
-    </article>
-    <article id="projects/algo-playground" class="project project--featured">
-      <div class="shot shot--empty" aria-hidden="true"><span>Algorithm Visual Playground</span></div>
-      <div class="project-body">
-        <h3>Algorithm Visual Playground <a class="permalink" href="#projects/algo-playground" aria-label="Link to Algorithm Visual Playground"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
-        <p class="meta">Aug 2025</p>
-        <p class="project-summary">Watch sorting and pathfinding algorithms run step by step.</p>
-        <ul class="bullets"><li>Sorting visualizer: Bubble, Merge and Quick Sort.</li><li>Pathfinding playground with walls: BFS, DFS, A* and Dijkstra.</li><li>Graph exploration where nodes light up as the search unfolds.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>Python</li><li>Streamlit</li><li>Matplotlib</li><li>NumPy</li><li>Algorithms</li></ul>
-        <div class="actions"><a class="btn btn--sm" href="https://github.com/amlad15/Algorithm-Visual-Playground"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>Code</a></div>
-      </div>
-    </article></div>
-    <h3 class="subhead">More projects</h3><div class="projects-grid projects-grid--small">
-    <article id="projects/admin-crm" class="project">
-      <div class="shot shot--empty" aria-hidden="true"><span>Admin/CRM Tracking Tool</span></div>
-      <div class="project-body">
-        <h3>Admin/CRM Tracking Tool <a class="permalink" href="#projects/admin-crm" aria-label="Link to Admin/CRM Tracking Tool"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
-        
-        <p class="project-summary">Locally hosted admin tracking and CRM tool built for internal MSP use.</p>
-        <ul class="bullets"><li>Customer flowcharts, task tracking, asset and server inventories, and due-date reminders.</li><li>Unified command system (natural language plus slash commands with autocomplete) to add, update and query records, with the UI jumping to the affected record.</li><li>Structured asset naming and bulk range logic integrated with RMM tool exports.</li><li>Fully self-hosted for data security, with no external API dependencies.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>Node.js</li><li>Express</li><li>PostgreSQL</li><li>Docker</li></ul>
-        
-      </div>
-    </article>
-    <article id="projects/cultural-archive" class="project">
-      <div class="shot shot--empty" aria-hidden="true"><span>Cultural Archive &amp; Intranet Infrastructure</span></div>
-      <div class="project-body">
-        <h3>Cultural Archive &amp; Intranet Infrastructure <a class="permalink" href="#projects/cultural-archive" aria-label="Link to Cultural Archive &amp; Intranet Infrastructure"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
-        
-        <p class="project-summary">Archive sites and an internal intranet, deployed and maintained for a client.</p>
-        <ul class="bullets"><li>Mukurtu CMS for a client&#39;s cultural archive site: taxonomy configuration and custom theming.</li><li>AtoM archival records site on an Ubuntu VPS.</li><li>Internal Hyper-V-hosted intranet behind an IIS reverse proxy with SSL.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>Mukurtu</li><li>AtoM</li><li>Drupal</li><li>Hyper-V</li><li>IIS</li></ul>
-        
-      </div>
-    </article>
-    <article id="projects/gitabot" class="project">
-      <div class="shot shot--empty" aria-hidden="true"><span>Gitabot</span></div>
-      <div class="project-body">
-        <h3>Gitabot <a class="permalink" href="#projects/gitabot" aria-label="Link to Gitabot"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
-        <p class="meta">Dec 2024 – Jan 2025</p>
-        <p class="project-summary">AI chatbot grounded in the Bhagavad Gita, used by 50+ beta users in a mobile app.</p>
-        <ul class="bullets"><li>Custom NLP dataset of 700+ verse-based Q&amp;A pairs across all 18 chapters.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>Python</li><li>NLP</li><li>Mobile App</li><li>Dataset Curation</li></ul>
-        
-      </div>
-    </article>
-    <article id="projects/infodumper" class="project">
-      <div class="shot shot--empty" aria-hidden="true"><span>Infodumper</span></div>
-      <div class="project-body">
-        <h3>Infodumper <a class="permalink" href="#projects/infodumper" aria-label="Link to Infodumper"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
-        <p class="meta">Mar – Apr 2025</p>
-        <p class="project-summary">Experimental AI-generated YouTube channel that passed 30,000 organic views in a few weeks.</p>
-        <ul class="bullets"><li>Short videos on historical, religious and conspiracy topics, exploring AI for content creation and automation.</li></ul>
-        <ul class="tags" aria-label="Tags"><li>AI</li><li>Content Creation</li><li>Automation</li><li>Video</li></ul>
-        <div class="actions"><a class="btn btn--sm" href="https://www.youtube.com/@infodumperca"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M3 5h18v14H3zM10 9l5 3-5 3z"/></svg>Watch on YouTube</a></div>
-      </div>
-    </article></div>
-  </div>
-</section>
-
-<section id="skills" class="section section--alt" aria-labelledby="skills-title">
-  <div class="wrap">
-    <header class="section-head"><h2 id="skills-title">Skills</h2></header>
-    <div class="skills-grid">
-      <div class="skill-group">
-        <h3>Languages</h3>
-        <p class="muted small">Primary: Python &amp; TypeScript</p>
-        <ul class="tags tags--lg"><li>Python</li><li>TypeScript</li><li>JavaScript</li><li>SQL</li><li>HTML</li><li>CSS</li><li>Bash</li><li>YAML</li></ul>
-      </div>
-      <div class="skill-group">
-        <h3>Frameworks &amp; Libraries</h3>
-        <p class="muted small">Full-stack web &amp; real-time apps</p>
-        <ul class="tags tags--lg"><li>React</li><li>Next.js 14</li><li>Node.js</li><li>Express</li><li>Socket.IO</li><li>Leaflet.js</li><li>TailwindCSS</li><li>NextAuth.js</li><li>Streamlit</li></ul>
-      </div>
-      <div class="skill-group">
-        <h3>AI &amp; Machine Learning</h3>
-        <p class="muted small">Local LLM workflows &amp; agent systems</p>
-        <ul class="tags tags--lg"><li>LLM Integration</li><li>Ollama</li><li>CrewAI</li><li>Multi-Agent Systems</li><li>Prompt Engineering</li><li>NLP</li><li>DeepSeek</li><li>Llama 3</li><li>Mistral</li></ul>
-      </div>
-      <div class="skill-group">
-        <h3>Data &amp; Databases</h3>
-        <p class="muted small">Spatial databases &amp; real-time pipelines</p>
-        <ul class="tags tags--lg"><li>PostgreSQL</li><li>PostGIS</li><li>pgvector</li><li>MongoDB</li><li>REST APIs</li><li>WebSockets</li><li>Data Engineering</li><li>Power BI</li><li>Data Visualization</li></ul>
-      </div>
-      <div class="skill-group">
-        <h3>DevOps &amp; Cloud</h3>
-        <p class="muted small">Containers &amp; deployment</p>
-        <ul class="tags tags--lg"><li>Docker</li><li>Kubernetes</li><li>GitHub Actions</li><li>CI/CD</li><li>AWS</li><li>Vercel</li><li>Linux</li><li>Git</li></ul>
-      </div>
-      <div class="skill-group">
-        <h3>IT &amp; Systems</h3>
-        <p class="muted small">From MSP sysadmin work</p>
-        <ul class="tags tags--lg"><li>Microsoft 365 / Intune</li><li>Active Directory / Azure AD</li><li>AD CS (internal PKI)</li><li>IAM</li><li>Proofpoint</li><li>PowerShell</li><li>Microsoft Graph</li><li>Wireshark</li><li>VLANs / DHCP / firewall fundamentals</li><li>Wi-Fi site surveys (NetSpot)</li></ul>
-      </div>
-      <div class="skill-group">
-        <h3>Web &amp; Marketing</h3>
-        <p class="muted small">From freelance and client work</p>
-        <ul class="tags tags--lg"><li>WordPress / Elementor</li><li>Google Ads</li><li>Google Business Profile</li><li>Meta Ads</li><li>SEO</li></ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="education" class="section" aria-labelledby="education-title">
-  <div class="wrap">
-    <header class="section-head"><h2 id="education-title">Education</h2></header>
-    
-    <article id="education/ualberta" class="edu">
-      <h3>BSc Computing Science, <span class="muted">Minor in Economics</span></h3>
-      <p class="job-org"><a class="text-link" href="https://www.ualberta.ca">University of Alberta</a></p>
-      <p class="meta">2022 – Expected Dec 2026 · Edmonton, AB</p>
-      <h4 class="small-head">Scholarships</h4><ul class="bullets"><li>Regional Excellence Scholarship: $5,000 CAD (2023)</li><li>International Admission Scholarship: $5,000 CAD (2022)</li></ul>
-    </article>
-  </div>
-</section>
-
-<section id="certificates" class="section section--alt" aria-labelledby="certificates-title" hidden>
-  <div class="wrap">
-    <header class="section-head"><h2 id="certificates-title">Certificates</h2></header>
-    <ul class="certs" data-certs></ul>
-  </div>
-</section>
-
-<section id="about" class="section" aria-labelledby="about-title">
-  <div class="wrap about">
-    <div>
-      <header class="section-head"><h2 id="about-title">About</h2></header>
-      <p class="prose">I was born in India and grew up across Oman, Bahrain and Dubai. Moving between cultures early taught me to adapt quickly and work well with people from very different backgrounds.</p><p class="prose">At the University of Alberta I&#39;ve focused on Computing Science with a minor in Economics. I&#39;m drawn to logic-driven problem solving and working with data, and I spend a lot of my spare time building full-stack apps and experimenting with local LLMs and AI agents.</p><p class="prose">Outside of code I&#39;m into cooking, gaming, film, football and Formula 1, markets and geopolitics, and travelling around India.</p>
-      <dl class="facts">
-        <div><dt>Languages</dt><dd>English, Hindi, Marathi, French (basic)</dd></div>
-        <div><dt>Background</dt><dd>Born in India · raised in Oman, Bahrain and Dubai · based in Edmonton</dd></div>
-      </dl>
-    </div>
-    <div>
-      <h3 class="subhead" id="interests">Interests</h3>
-      <ul class="interests"><li id="about/gaming"><h4>Gaming</h4><p>Tactical shooters, battle royales, sims and sandbox games: CS2, Valorant, Apex Legends, Call of Duty, War Thunder, Marvel Rivals, Minecraft.</p></li><li id="about/cinema"><h4>Cinema</h4><p>All-time favourites: The Godfather Part II, Interstellar and Whiplash. Personal ones: Tron, Frankenstein and Top Gun: Maverick.</p></li><li id="about/ai"><h4>AI &amp; Automation</h4><p>How AI can automate creative and technical work: local LLMs, multi-agent systems and AI-assisted content.</p></li><li id="about/finance"><h4>Economics, Finance &amp; Trading</h4><p>Financial markets, algorithmic trading and macro trends. I follow geopolitics closely, which is what led to the GCID dashboard.</p></li><li id="about/sports"><h4>Football &amp; Formula 1</h4><p>I enjoy the strategy and engineering behind F1 as much as the racing. Football connects me back to my roots and friendships.</p></li></ul>
-    </div>
-  </div>
-</section>
-
-<section id="contact" class="section section--alt" aria-labelledby="contact-title">
-  <div class="wrap">
-    <header class="section-head"><h2 id="contact-title">Contact</h2><p class="lede">Hiring for a new-grad role, or need a website for your business? Email is the best way to reach me. Based in Edmonton, Alberta, Canada.</p></header>
-    <ul class="contact-list"><li><a href="mailto:ladaaron15@gmail.com"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 5h18v14H3zM3 6l9 7 9-7"/></svg><span><span class="contact-label">Email</span><span class="contact-value">ladaaron15@gmail.com</span></span></a></li><li><a href="tel:+18253432012"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/></svg><span><span class="contact-label">Phone</span><span class="contact-value">(825) 343-2012</span></span></a></li><li><a href="https://www.linkedin.com/in/aaron-lad-80070625b"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></svg><span><span class="contact-label">LinkedIn</span><span class="contact-value">linkedin.com/in/aaron-lad-80070625b</span></span></a></li><li><a href="https://github.com/amlad15"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg><span><span class="contact-label">GitHub</span><span class="contact-value">github.com/amlad15</span></span></a></li><li><a href="assets/AaronCV.pdf"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5"/></svg><span><span class="contact-label">Resume</span><span class="contact-value">Download PDF</span></span></a></li>
+  <canvas class="starfield" aria-hidden="true"></canvas>
+  <svg class="hero-orbit" viewBox="0 0 440 440" aria-hidden="true" focusable="false">
+    <g transform="rotate(-16 220 220)">
+      <ellipse cx="220" cy="220" rx="96" ry="36"/><ellipse cx="220" cy="220" rx="150" ry="56"/><ellipse cx="220" cy="220" rx="204" ry="76"/>
+      <line class="hero-orbit-axis" x1="0" y1="220" x2="440" y2="220"/>
+      <circle class="hero-orbit-sun" cx="220" cy="220" r="7"/>
+      <circle class="hero-orbit-moon is-accent" r="4.5"><animateMotion dur="26s" begin="-0s" repeatCount="indefinite" path="M124 220a96 36 0 1 0 192 0a96 36 0 1 0 -192 0"/></circle><circle class="hero-orbit-moon" r="3"><animateMotion dur="44s" begin="-9s" repeatCount="indefinite" path="M70 220a150 56 0 1 0 300 0a150 56 0 1 0 -300 0"/></circle><circle class="hero-orbit-moon" r="3"><animateMotion dur="70s" begin="-18s" repeatCount="indefinite" path="M16 220a204 76 0 1 0 408 0a204 76 0 1 0 -408 0"/></circle>
+    </g>
+  </svg>
+  <div class="wrap hero-grid">
+    <p class="kicker" data-intro="0">Flight record</p>
+    <h1 id="hero-title" class="hero-name" data-intro="1">Aaron Lad</h1>
+    <p class="hero-pitch" data-intro="2">Full-stack developer with hands-on IT and sysadmin experience, open to new-grad roles and freelance web projects.</p>
+    <ul class="status" data-intro="3" aria-label="Status"><li>Open to new-grad roles</li><li>Taking freelance web projects</li><li>Edmonton, AB</li></ul>
+    <ul class="hero-links" data-intro="4">
+      <li><a class="btn btn--primary" href="assets/AaronCV.pdf">Resume <span class="btn-note">PDF</span></a></li>
+      <li><a class="btn" href="https://github.com/amlad15">GitHub</a></li>
+      <li><a class="btn" href="https://www.linkedin.com/in/aaron-lad-80070625b">LinkedIn</a></li>
+      <li><a class="btn" href="mailto:ladaaron15@gmail.com">Email</a></li>
     </ul>
+    <div class="hero-foot" data-intro="5">
+      <dl class="manifest">
+        <div><dt>Current</dt><dd>IT Consultant, Aerocool System Air Solutions</dd></div>
+        <div><dt>Training</dt><dd>BSc Computing Science, University of Alberta · Expected Dec 2026</dd></div>
+      </dl>
+      <button type="button" class="explore" data-open-3d hidden>
+        <svg class="explore-orbit" viewBox="0 0 48 48" aria-hidden="true"><circle class="explore-sun" cx="24" cy="24" r="4"/><ellipse cx="24" cy="24" rx="20" ry="8"/><g class="explore-path"><circle class="explore-moon" cx="44" cy="24" r="2.75"/></g></svg>
+        <span class="explore-text">Explore in 3D<span class="explore-sub">This portfolio as a solar system</span></span>
+      </button>
+    </div>
+  </div>
+</section>
+<section id="experience" class="section" aria-labelledby="experience-title">
+  <div class="wrap grid">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Flight record</p>
+      <h2 id="experience-title">Experience</h2>
+      
+    </header>
+    <div class="sec-body"><ol class="timeline">
+      <li id="experience/aerocool" class="tl-item is-current" data-reveal>
+        <p class="tl-when">Sep 2026 – Present</p>
+        <div class="tl-body">
+          <h3 class="tl-role">IT Consultant <span class="tl-type">Part-time contract</span></h3>
+          <p class="tl-org">Aerocool System Air Solutions Ltd. <span class="muted">· Edmonton, AB</span></p>
+          <details class="disclose" open>
+            <summary><span class="disclose-label">Highlights</span><span class="count">03</span></summary>
+            <div class="disclose-body">
+              <ul class="bullets"><li>Sole technical contact for the company&#39;s web, email and marketing infrastructure.</li><li>Built their Canadian website, aerocool.ca, with WordPress and Elementor.</li><li>Manage their Google Business Profile and Google Ads, and set up their Meta Page and ads.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>WordPress</li><li>Elementor</li><li>Google Ads</li><li>Google Business Profile</li><li>Meta Ads</li></ul>
+              <a class="link" href="https://aerocool.ca">aerocool.ca<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M8 7h9v9"/></svg></a>
+            </div>
+          </details>
+        </div>
+      </li>
+      <li id="experience/guidepost" class="tl-item" data-reveal>
+        <p class="tl-when">Apr 2026 – Aug 2026</p>
+        <div class="tl-body">
+          <h3 class="tl-role">Junior Sysadmin <span class="tl-type">Internship</span></h3>
+          <p class="tl-org">GuidePost Technologies Inc. <span class="muted">· Managed IT services provider</span> <span class="muted">· Edmonton, AB</span></p>
+          <details class="disclose" open>
+            <summary><span class="disclose-label">Highlights</span><span class="count">07</span></summary>
+            <div class="disclose-body">
+              <ul class="bullets"><li>Provisioned and managed Microsoft 365 accounts, licensing and access across multiple client tenants.</li><li>Deployed and configured hardware for client environments, including laptop imaging and asset setup.</li><li>Resolved MSP support tickets spanning Intune compliance, firewall SSL inspection errors, Windows configuration issues and VM provisioning.</li><li>Configured an internal Certificate Authority (AD CS) for HTTPS on internal domains; performed Wi-Fi site surveys and network troubleshooting with Wireshark.</li><li>Wrote PowerShell automation for Azure AD/AD administration, including one-click device provisioning (domain disjoin, RMM agent install, user creation, restart).</li><li>Managed IAM access and Proofpoint email security configuration across client accounts.</li><li>Supported marketing operations: SEO content, Google Ads and client communications.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>Microsoft 365</li><li>Intune</li><li>PowerShell</li><li>Azure AD</li><li>AD CS</li><li>Proofpoint</li><li>Wireshark</li><li>IAM</li></ul>
+              
+            </div>
+          </details>
+        </div>
+      </li>
+      <li id="experience/unconventional" class="tl-item" data-reveal>
+        <p class="tl-when">Dec 2024 – Aug 2025</p>
+        <div class="tl-body">
+          <h3 class="tl-role">Partner &amp; Head of Web Development</h3>
+          <p class="tl-org">Unconventional Media Canada <span class="muted">· Canada</span></p>
+          <details class="disclose">
+            <summary><span class="disclose-label">Highlights</span><span class="count">03</span></summary>
+            <div class="disclose-body">
+              <ul class="bullets"><li>Led full-stack web development for 12+ client businesses across 5 industries, delivering responsive, accessible websites with a 2-week average turnaround.</li><li>Managed and mentored a team of 3 developers, enforcing code quality standards and WCAG accessibility compliance across 100% of client deadlines.</li><li>Drove 30%+ revenue growth through targeted outreach and long-term client relationships, helping the company reach profitability within 6 months.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>Full-Stack</li><li>Team Lead</li><li>Web Development</li><li>Client Management</li></ul>
+              
+            </div>
+          </details>
+        </div>
+      </li>
+      <li id="experience/hydrotec" class="tl-item tl-item--compact" data-reveal>
+        <p class="tl-when">Jan – Mar 2021 · May 2022</p>
+        <div class="tl-body">
+          <h3 class="tl-role">Administrative &amp; Customer Acquisition Associate</h3>
+          <p class="tl-org">Hydrotec International L.L.C. <span class="muted">· Oman</span></p>
+          <details class="disclose">
+            <summary><span class="disclose-label">Highlights</span><span class="count">02</span></summary>
+            <div class="disclose-body">
+              <ul class="bullets"><li>Qualified 50+ business leads and built a 120+ company prospect database that supported 3 closed deals; wrote 10+ outreach templates adopted company-wide.</li><li>Ran logistics for a 100+ attendee corporate event and maintained a 200+ contact CRM.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>Sales</li><li>Lead Generation</li><li>CRM</li><li>Operations</li></ul>
+              
+            </div>
+          </details>
+        </div>
+      </li></ol></div>
+  </div>
+</section>
+<section id="services" class="section" aria-labelledby="services-title">
+  <div class="wrap grid">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Contract work</p>
+      <h2 id="services-title">Freelance &amp; Services</h2>
+      <p class="dek">I build websites and set up digital marketing for small businesses in Edmonton and across Alberta.</p>
+    </header>
+    <div class="sec-body">
+      <dl class="rows" data-reveal><div class="row"><dt>Websites</dt><dd>Responsive, accessible business websites in WordPress/Elementor or custom code.</dd></div><div class="row"><dt>Google presence</dt><dd>Google Business Profile setup and upkeep, plus Google Ads campaigns.</dd></div><div class="row"><dt>Social ads</dt><dd>Meta (Facebook/Instagram) Page setup and ad campaigns.</dd></div><div class="row"><dt>Ongoing tech support</dt><dd>One point of contact for your website, email and marketing tools.</dd></div></dl>
+      <article id="services/aerocool-case" class="case" data-reveal>
+        <div class="case-text">
+          <p class="kicker">Case study · HVAC · Edmonton</p>
+          <h3 class="case-title">aerocool.ca</h3>
+          <p class="muted">Aerocool System Air Solutions</p>
+          <ul class="bullets"><li>Built the Canadian website in WordPress with Elementor.</li><li>Set up and manage the Google Business Profile and Google Ads.</li><li>Set up the Meta Page and ads.</li><li>Ongoing sole technical contact for web, email and marketing.</li></ul>
+          <a class="link" href="https://aerocool.ca">Visit aerocool.ca<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M8 7h9v9"/></svg></a>
+        </div>
+        <figure class="shot shot--empty" aria-hidden="true"><span>Screenshot pending</span></figure>
+      </article>
+      <p class="track" data-reveal>As Partner &amp; Head of Web Development at Unconventional Media Canada I led 12+ client websites across 5 industries, with a 2-week average turnaround and WCAG accessibility on every project.</p>
+      <p class="cta" data-reveal><a class="btn btn--primary btn--lg" href="mailto:ladaaron15@gmail.com?subject=Website%20project">Start a project</a></p></div>
+  </div>
+</section>
+<section id="projects" class="section" aria-labelledby="projects-title">
+  <div class="wrap grid">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Mission log</p>
+      <h2 id="projects-title">Projects</h2>
+      <p class="dek">Open any row for the full mission report.</p>
+    </header>
+    <div class="sec-body">
+      <div class="m-head" aria-hidden="true"><span>Launch</span><span>Mission · result</span><span>Stack</span></div>
+      <ol class="missions">
+      <li id="projects/gcid" class="mission" data-reveal>
+        <details class="disclose disclose--row">
+          <summary class="m-row">
+            <span class="m-date"><time datetime="2026-01">Jan 2026</time></span>
+            <span class="m-main">
+              <h3 class="m-name"><span class="m-id">M-01</span> Global Conflict Intelligence Dashboard</h3>
+              <span class="m-result">4 external APIs, sub-second updates</span>
+            </span>
+            <span class="m-stack">Next.js · TypeScript · Node.js</span>
+            <span class="m-toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="disclose-body m-detail">
+            <div class="m-text">
+              <p class="m-summary">Real-time OSINT map of live aircraft, ships, conflict events and breaking news.</p>
+              <ul class="bullets"><li>Integrated 4 external APIs (OpenSky, AISStream, ACLED, GDELT) with WebSocket streaming for sub-second live updates.</li><li>PostGIS spatial queries and anomaly detection across 200+ daily events.</li><li>Local Ollama LLM writes geopolitical intelligence summaries at zero API cost.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>Next.js</li><li>TypeScript</li><li>Node.js</li><li>PostgreSQL</li><li>PostGIS</li><li>Socket.IO</li><li>Leaflet.js</li><li>Ollama</li><li>Docker</li></ul>
+              <p class="m-links"><a class="btn btn--sm" href="https://github.com/amlad15/Global-Conflict-Intelligence-Dashboard"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>Code</a><a class="permalink" href="#projects/gcid">Link to this mission</a></p>
+            </div>
+            <figure class="shot shot--empty" aria-hidden="true"><span>Screenshot pending</span></figure>
+          </div>
+        </details>
+      </li>
+      <li id="projects/deepforge" class="mission" data-reveal>
+        <details class="disclose disclose--row">
+          <summary class="m-row">
+            <span class="m-date"><time datetime="2026-02">Feb 2026</time></span>
+            <span class="m-main">
+              <h3 class="m-name"><span class="m-id">M-02</span> DeepForge</h3>
+              <span class="m-result">4-agent dev pipeline, fully local</span>
+            </span>
+            <span class="m-stack">Python · CrewAI · Ollama</span>
+            <span class="m-toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="disclose-body m-detail">
+            <div class="m-text">
+              <p class="m-summary">Multi-agent AI system that simulates a small software engineering team.</p>
+              <ul class="bullets"><li>Four CrewAI agents (Planner, Coder, Reviewer, Builder) each own one stage of development.</li><li>Runs fully locally on Ollama with DeepSeek Coder, with no external API dependency.</li><li>Explores prompt engineering, agent coordination and end-to-end automated pipelines.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>Python</li><li>CrewAI</li><li>Ollama</li><li>DeepSeek Coder</li><li>AI Agents</li><li>Prompt Engineering</li></ul>
+              <p class="m-links"><a class="btn btn--sm" href="https://github.com/amlad15/DeepForge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>Code</a><a class="permalink" href="#projects/deepforge">Link to this mission</a></p>
+            </div>
+            <figure class="shot shot--empty" aria-hidden="true"><span>Screenshot pending</span></figure>
+          </div>
+        </details>
+      </li>
+      <li id="projects/yt-spotify" class="mission" data-reveal>
+        <details class="disclose disclose--row">
+          <summary class="m-row">
+            <span class="m-date"><time datetime="2026-03">Mar 2026</time></span>
+            <span class="m-main">
+              <h3 class="m-name"><span class="m-id">M-03</span> YT-Spotify Playlist Converter</h3>
+              <span class="m-result">85%+ song match accuracy</span>
+            </span>
+            <span class="m-stack">Next.js 14 · TypeScript · Spotify API</span>
+            <span class="m-toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="disclose-body m-detail">
+            <div class="m-text">
+              <p class="m-summary">Paste a playlist URL, sign in, and it&#39;s recreated on the other service in under 30 seconds.</p>
+              <ul class="bullets"><li>Dual OAuth via NextAuth.js keeps Spotify and Google tokens live at the same time without session conflicts.</li><li>Fuzzy title matching reaches 85%+ song match accuracy across varied playlists.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>Next.js 14</li><li>TypeScript</li><li>Spotify API</li><li>YouTube API</li><li>NextAuth.js</li><li>OAuth</li><li>Vercel</li></ul>
+              <p class="m-links"><a class="permalink" href="#projects/yt-spotify">Link to this mission</a></p>
+            </div>
+            <figure class="shot shot--empty" aria-hidden="true"><span>Screenshot pending</span></figure>
+          </div>
+        </details>
+      </li>
+      <li id="projects/algo-playground" class="mission" data-reveal>
+        <details class="disclose disclose--row">
+          <summary class="m-row">
+            <span class="m-date"><time datetime="2025-08">Aug 2025</time></span>
+            <span class="m-main">
+              <h3 class="m-name"><span class="m-id">M-04</span> Algorithm Visual Playground</h3>
+              <span class="m-result">3 sorts, 4 pathfinding algorithms</span>
+            </span>
+            <span class="m-stack">Python · Streamlit · Matplotlib</span>
+            <span class="m-toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="disclose-body m-detail">
+            <div class="m-text">
+              <p class="m-summary">Watch sorting and pathfinding algorithms run step by step.</p>
+              <ul class="bullets"><li>Sorting visualizer: Bubble, Merge and Quick Sort.</li><li>Pathfinding playground with walls: BFS, DFS, A* and Dijkstra.</li><li>Graph exploration where nodes light up as the search unfolds.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>Python</li><li>Streamlit</li><li>Matplotlib</li><li>NumPy</li><li>Algorithms</li></ul>
+              <p class="m-links"><a class="btn btn--sm" href="https://github.com/amlad15/Algorithm-Visual-Playground"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>Code</a><a class="permalink" href="#projects/algo-playground">Link to this mission</a></p>
+            </div>
+            <figure class="shot shot--empty" aria-hidden="true"><span>Screenshot pending</span></figure>
+          </div>
+        </details>
+      </li>
+      <li id="projects/admin-crm" class="mission" data-reveal>
+        <details class="disclose disclose--row">
+          <summary class="m-row">
+            <span class="m-date"><span class="m-nodate" aria-label="Date not listed">—</span></span>
+            <span class="m-main">
+              <h3 class="m-name"><span class="m-id">M-05</span> Admin/CRM Tracking Tool</h3>
+              <span class="m-result">Self-hosted, no external APIs</span>
+            </span>
+            <span class="m-stack">Node.js · Express · PostgreSQL</span>
+            <span class="m-toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="disclose-body m-detail">
+            <div class="m-text">
+              <p class="m-summary">Locally hosted admin tracking and CRM tool built for internal MSP use.</p>
+              <ul class="bullets"><li>Customer flowcharts, task tracking, asset and server inventories, and due-date reminders.</li><li>Unified command system (natural language plus slash commands with autocomplete) to add, update and query records, with the UI jumping to the affected record.</li><li>Structured asset naming and bulk range logic integrated with RMM tool exports.</li><li>Fully self-hosted for data security, with no external API dependencies.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>Node.js</li><li>Express</li><li>PostgreSQL</li><li>Docker</li></ul>
+              <p class="m-links"><a class="permalink" href="#projects/admin-crm">Link to this mission</a></p>
+            </div>
+            <figure class="shot shot--empty" aria-hidden="true"><span>Screenshot pending</span></figure>
+          </div>
+        </details>
+      </li>
+      <li id="projects/cultural-archive" class="mission" data-reveal>
+        <details class="disclose disclose--row">
+          <summary class="m-row">
+            <span class="m-date"><span class="m-nodate" aria-label="Date not listed">—</span></span>
+            <span class="m-main">
+              <h3 class="m-name"><span class="m-id">M-06</span> Cultural Archive &amp; Intranet Infrastructure</h3>
+              <span class="m-result">Archive, records site and intranet</span>
+            </span>
+            <span class="m-stack">Mukurtu · AtoM · Drupal</span>
+            <span class="m-toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="disclose-body m-detail">
+            <div class="m-text">
+              <p class="m-summary">Archive sites and an internal intranet, deployed and maintained for a client.</p>
+              <ul class="bullets"><li>Mukurtu CMS for a client&#39;s cultural archive site: taxonomy configuration and custom theming.</li><li>AtoM archival records site on an Ubuntu VPS.</li><li>Internal Hyper-V-hosted intranet behind an IIS reverse proxy with SSL.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>Mukurtu</li><li>AtoM</li><li>Drupal</li><li>Hyper-V</li><li>IIS</li></ul>
+              <p class="m-links"><a class="permalink" href="#projects/cultural-archive">Link to this mission</a></p>
+            </div>
+            <figure class="shot shot--empty" aria-hidden="true"><span>Screenshot pending</span></figure>
+          </div>
+        </details>
+      </li></ol>
+      <h3 class="subhead" data-reveal>Side missions</h3>
+      <ol class="missions missions--minor">
+      <li id="projects/gitabot" class="mission mission--minor" data-reveal>
+        <details class="disclose disclose--row">
+          <summary class="m-row">
+            <span class="m-date"><time datetime="2024-12">Dec 2024</time></span>
+            <span class="m-main">
+              <h3 class="m-name"><span class="m-id">M-07</span> Gitabot</h3>
+              <span class="m-result">700+ Q&amp;A pairs, 50+ beta users</span>
+            </span>
+            <span class="m-stack">Python · NLP · Mobile App</span>
+            <span class="m-toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="disclose-body m-detail">
+            <div class="m-text">
+              <p class="m-summary">AI chatbot grounded in the Bhagavad Gita, used by 50+ beta users in a mobile app.</p>
+              <ul class="bullets"><li>Custom NLP dataset of 700+ verse-based Q&amp;A pairs across all 18 chapters.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>Python</li><li>NLP</li><li>Mobile App</li><li>Dataset Curation</li></ul>
+              <p class="m-links"><a class="permalink" href="#projects/gitabot">Link to this mission</a></p>
+            </div>
+            <figure class="shot shot--empty" aria-hidden="true"><span>Screenshot pending</span></figure>
+          </div>
+        </details>
+      </li>
+      <li id="projects/infodumper" class="mission mission--minor" data-reveal>
+        <details class="disclose disclose--row">
+          <summary class="m-row">
+            <span class="m-date"><time datetime="2025-03">Mar 2025</time></span>
+            <span class="m-main">
+              <h3 class="m-name"><span class="m-id">M-08</span> Infodumper</h3>
+              <span class="m-result">30,000+ organic views</span>
+            </span>
+            <span class="m-stack">AI · Content Creation · Automation</span>
+            <span class="m-toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="disclose-body m-detail">
+            <div class="m-text">
+              <p class="m-summary">Experimental AI-generated YouTube channel that passed 30,000 organic views in a few weeks.</p>
+              <ul class="bullets"><li>Short videos on historical, religious and conspiracy topics, exploring AI for content creation and automation.</li></ul>
+              <ul class="stack" aria-label="Stack"><li>AI</li><li>Content Creation</li><li>Automation</li><li>Video</li></ul>
+              <p class="m-links"><a class="btn btn--sm" href="https://www.youtube.com/@infodumperca">Watch on YouTube<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M8 7h9v9"/></svg></a><a class="permalink" href="#projects/infodumper">Link to this mission</a></p>
+            </div>
+            <figure class="shot shot--empty" aria-hidden="true"><span>Screenshot pending</span></figure>
+          </div>
+        </details>
+      </li></ol></div>
+  </div>
+</section>
+<section id="skills" class="section" aria-labelledby="skills-title">
+  <div class="wrap grid">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Systems</p>
+      <h2 id="skills-title">Skills</h2>
+      
+    </header>
+    <div class="sec-body">
+      <dl class="rows rows--skills">
+        <div class="row" data-reveal>
+          <dt>Languages<span class="row-note">Primary: Python &amp; TypeScript</span></dt>
+          <dd><ul class="inline-list"><li>Python</li><li>TypeScript</li><li>JavaScript</li><li>SQL</li><li>HTML</li><li>CSS</li><li>Bash</li><li>YAML</li></ul></dd>
+        </div>
+        <div class="row" data-reveal>
+          <dt>Frameworks &amp; Libraries<span class="row-note">Full-stack web &amp; real-time apps</span></dt>
+          <dd><ul class="inline-list"><li>React</li><li>Next.js 14</li><li>Node.js</li><li>Express</li><li>Socket.IO</li><li>Leaflet.js</li><li>TailwindCSS</li><li>NextAuth.js</li><li>Streamlit</li></ul></dd>
+        </div>
+        <div class="row" data-reveal>
+          <dt>AI &amp; Machine Learning<span class="row-note">Local LLM workflows &amp; agent systems</span></dt>
+          <dd><ul class="inline-list"><li>LLM Integration</li><li>Ollama</li><li>CrewAI</li><li>Multi-Agent Systems</li><li>Prompt Engineering</li><li>NLP</li><li>DeepSeek</li><li>Llama 3</li><li>Mistral</li></ul></dd>
+        </div>
+        <div class="row" data-reveal>
+          <dt>Data &amp; Databases<span class="row-note">Spatial databases &amp; real-time pipelines</span></dt>
+          <dd><ul class="inline-list"><li>PostgreSQL</li><li>PostGIS</li><li>pgvector</li><li>MongoDB</li><li>REST APIs</li><li>WebSockets</li><li>Data Engineering</li><li>Power BI</li><li>Data Visualization</li></ul></dd>
+        </div>
+        <div class="row" data-reveal>
+          <dt>DevOps &amp; Cloud<span class="row-note">Containers &amp; deployment</span></dt>
+          <dd><ul class="inline-list"><li>Docker</li><li>Kubernetes</li><li>GitHub Actions</li><li>CI/CD</li><li>AWS</li><li>Vercel</li><li>Linux</li><li>Git</li></ul></dd>
+        </div>
+        <div class="row" data-reveal>
+          <dt>IT &amp; Systems<span class="row-note">From MSP sysadmin work</span></dt>
+          <dd><ul class="inline-list"><li>Microsoft 365 / Intune</li><li>Active Directory / Azure AD</li><li>AD CS (internal PKI)</li><li>IAM</li><li>Proofpoint</li><li>PowerShell</li><li>Microsoft Graph</li><li>Wireshark</li><li>VLANs / DHCP / firewall fundamentals</li><li>Wi-Fi site surveys (NetSpot)</li></ul></dd>
+        </div>
+        <div class="row" data-reveal>
+          <dt>Web &amp; Marketing<span class="row-note">From freelance and client work</span></dt>
+          <dd><ul class="inline-list"><li>WordPress / Elementor</li><li>Google Ads</li><li>Google Business Profile</li><li>Meta Ads</li><li>SEO</li></ul></dd>
+        </div>
+      </dl></div>
+  </div>
+</section>
+<section id="education" class="section" aria-labelledby="education-title">
+  <div class="wrap grid">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Training</p>
+      <h2 id="education-title">Education</h2>
+      
+    </header>
+    <div class="sec-body"><ol class="timeline">
+      <li id="education/ualberta" class="tl-item" data-reveal>
+        <p class="tl-when">2022 – Expected Dec 2026</p>
+        <div class="tl-body">
+          <h3 class="tl-role">BSc Computing Science</h3>
+          <p class="tl-org"><a class="link" href="https://www.ualberta.ca">University of Alberta</a> <span class="muted">· Minor in Economics · Edmonton, AB</span></p>
+          <p class="small-label">Scholarships</p><ul class="bullets"><li>Regional Excellence Scholarship: $5,000 CAD (2023)</li><li>International Admission Scholarship: $5,000 CAD (2022)</li></ul>
+        </div>
+      </li></ol></div>
+  </div>
+</section>
+<section id="certificates" class="section" aria-labelledby="certificates-title" hidden>
+  <div class="wrap grid">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Certifications</p>
+      <h2 id="certificates-title">Certificates</h2>
+      
+    </header>
+    <div class="sec-body"><dl class="rows" data-certs></dl></div>
+  </div>
+</section>
+<section id="about" class="section" aria-labelledby="about-title">
+  <div class="wrap grid">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Crew file</p>
+      <h2 id="about-title">About</h2>
+      
+    </header>
+    <div class="sec-body">
+      <div class="prose" data-reveal><p>I was born in India and grew up across Oman, Bahrain and Dubai. Moving between cultures early taught me to adapt quickly and work well with people from very different backgrounds.</p><p>At the University of Alberta I&#39;ve focused on Computing Science with a minor in Economics. I&#39;m drawn to logic-driven problem solving and working with data, and I spend a lot of my spare time building full-stack apps and experimenting with local LLMs and AI agents.</p><p>Outside of code I&#39;m into cooking, gaming, film, football and Formula 1, markets and geopolitics, and travelling around India.</p></div>
+      <dl class="rows" data-reveal>
+        <div class="row"><dt>Languages</dt><dd>English, Hindi, Marathi, French (basic)</dd></div>
+        <div class="row"><dt>Background</dt><dd>Born in India · raised in Oman, Bahrain and Dubai · based in Edmonton</dd></div>
+      </dl>
+      <h3 class="subhead" id="interests" data-reveal>Off duty</h3>
+      <dl class="rows"><div class="row" id="about/gaming" data-reveal><dt>Gaming</dt><dd>Tactical shooters, battle royales, sims and sandbox games: CS2, Valorant, Apex Legends, Call of Duty, War Thunder, Marvel Rivals, Minecraft.</dd></div><div class="row" id="about/cinema" data-reveal><dt>Cinema</dt><dd>All-time favourites: The Godfather Part II, Interstellar and Whiplash. Personal ones: Tron, Frankenstein and Top Gun: Maverick.</dd></div><div class="row" id="about/ai" data-reveal><dt>AI &amp; Automation</dt><dd>How AI can automate creative and technical work: local LLMs, multi-agent systems and AI-assisted content.</dd></div><div class="row" id="about/finance" data-reveal><dt>Economics, Finance &amp; Trading</dt><dd>Financial markets, algorithmic trading and macro trends. I follow geopolitics closely, which is what led to the GCID dashboard.</dd></div><div class="row" id="about/sports" data-reveal><dt>Football &amp; Formula 1</dt><dd>I enjoy the strategy and engineering behind F1 as much as the racing. Football connects me back to my roots and friendships.</dd></div></dl></div>
+  </div>
+</section>
+<section id="contact" class="section" aria-labelledby="contact-title">
+  <div class="wrap grid">
+    <header class="sec-head" data-reveal>
+      <p class="kicker">Open channel</p>
+      <h2 id="contact-title">Contact</h2>
+      <p class="dek">Hiring for a new-grad role, or need a website for your business? Email is the best way to reach me.</p>
+    </header>
+    <div class="sec-body">
+      <p data-reveal><a class="contact-email" href="mailto:ladaaron15@gmail.com">ladaaron15@gmail.com</a></p>
+      <dl class="rows" data-reveal><div class="row"><dt>Phone</dt><dd><a class="link" href="tel:+18253432012">(825) 343-2012</a></dd></div><div class="row"><dt>LinkedIn</dt><dd><a class="link" href="https://www.linkedin.com/in/aaron-lad-80070625b">linkedin.com/in/aaron-lad-80070625b</a></dd></div><div class="row"><dt>GitHub</dt><dd><a class="link" href="https://github.com/amlad15">github.com/amlad15</a></dd></div><div class="row"><dt>Resume</dt><dd><a class="link" href="assets/AaronCV.pdf">Download PDF</a></dd></div></dl></div>
   </div>
 </section>
 <!-- /build:main -->
@@ -334,8 +482,8 @@
 
   <footer class="site-footer">
     <div class="wrap footer-inner">
-      <p>© <span data-year>2026</span> Aaron Lad · Hand-built with plain HTML, CSS and JavaScript.</p>
-      <button type="button" class="link-3d" data-open-3d hidden>Explore in 3D</button>
+      <p>© <span data-year>2026</span> Aaron Lad · Built by hand in plain HTML, CSS and JavaScript.</p>
+      <p class="footer-links"><a class="link" href="#top">Back to top</a><button type="button" class="link link-btn" data-open-3d hidden>Explore in 3D</button></p>
     </div>
   </footer>
 
