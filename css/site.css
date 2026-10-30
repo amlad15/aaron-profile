@@ -414,9 +414,7 @@ html {
 :root { --wash: 255, 106, 43; }
 :root[data-theme="light"] { --wash: 180, 56, 10; }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --wash: 180, 56, 10; } }
-body, .site-header, main, .site-footer, .skip-link { position: relative; }
-.site-header { z-index: 50; }
-main, .site-footer { z-index: 1; }
+main, .site-footer { position: relative; z-index: 1; }    /* above the fixed scene; the header is already sticky with its own z-index */
 .scene, .scene-fade, .scene-scrim { position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100lvh; pointer-events: none; }   /* lvh: no resize churn as mobile toolbars slide */
 .scene, .scene-fade { z-index: 0; display: block; }
 .scene { opacity: 0; transition: opacity 1.2s var(--ease); }
@@ -425,9 +423,10 @@ main, .site-footer { z-index: 1; }
 .scene-scrim {
   z-index: 0;
   /* Under 1100px the planet sits behind the text, so the whole frame is veiled */
-  background: color-mix(in srgb, var(--bg) 74%, transparent);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);   /* sized by the contrast audit: muted text stays AA over the brightest planet */
 }
-@media (max-width: 1099px) { :root { --scene-opacity: .75; } }    /* smaller, softer planet behind content */
+@media (max-width: 1099px) { :root { --scene-opacity: .7; } }     /* smaller, softer planet behind content */
+@media (max-width: 767px) { .scene-scrim { background: color-mix(in srgb, var(--bg) 84%, transparent); } }   /* phones: text covers the whole frame, so veil a little more */
 @media (min-width: 1100px) {
   .scene-scrim {
     /* Desktop: a veil behind the text column that clears for the right third, where the planet sits */
@@ -445,4 +444,5 @@ main, .site-footer { z-index: 1; }
 @media (min-width: 1280px) { :root { --gutter: 48px; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0s !important; animation: none !important; }
+  .scene-fade { transition-duration: .7s !important; }      /* the one motion reduced-motion keeps: a cross-fade between still frames */
 }
