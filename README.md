@@ -1,12 +1,12 @@
 # Aaron Lad: Portfolio
 
-A fast, scrolling portfolio with an optional **Explore in 3D** solar-system mode.
+A fast, scrolling portfolio with a scroll-driven solar system as its living background.
 Plain HTML, CSS and JavaScript. No build step is needed to deploy: GitHub Pages serves the repo as-is at
 <https://amlad15.github.io/aaron-profile/>.
 
 ## Edit content
 
-All content lives in **`js/content.js`**. Both the page and the 3D mode read it.
+All content lives in **`js/content.js`**. The page renders it, and the background scene reads the same sections.
 
 ```bash
 # 1. edit js/content.js
@@ -44,11 +44,10 @@ python -m http.server 8080
 ```
 index.html            page shell + prerendered content (between build markers)
 css/site.css          page styles
-css/3d.css            3D mode styles (loaded on first open)
 js/content.js         ★ all content
 js/render.js          SITE → HTML (shared by the page and tools/render.mjs)
-js/site.js            menu, active section, deep links, certificate check, 3D loader
-js/3d/                Three.js r128 solar system, loaded only when 3D mode opens
+js/site.js            menu, theme, active section, deep links, certificate check, scene loader
+js/scene/             background solar system: shaders.js (GLSL) + scene.js (bodies, scroll camera, loop)
 tools/render.mjs      prerender script (Node, no dependencies)
 assets/               resume, certificates, project screenshots, social preview image
 ```
@@ -56,18 +55,37 @@ assets/               resume, certificates, project screenshots, social preview 
 ## Deep links
 
 Every section and card has a link: `#projects`, `#projects/gcid`, `#experience/guidepost`,
-`#services/aerocool-case`. `#3d` opens the 3D mode.
+`#services/aerocool-case`. Loading a deep link puts the background camera at that section immediately (no fly-in).
 
 ## Design system
 
 - **Type:** Big Shoulders Display (headings), Public Sans (body), IBM Plex Mono (metadata only: dates, stacks, labels).
 - **Colour:** near-black or warm paper, plus one accent (international orange) used for the status beacon, current role, open rows and primary actions.
 - **Themes:** follows the system setting; the header toggle overrides it and remembers the choice.
-- **Motion:** one easing curve. Hero intro under 1.2s, staggered scroll reveal, animated `<details>`, View Transitions into 3D. All of it is off under `prefers-reduced-motion`.
+- **Motion:** one easing curve. Hero intro under 1.2s, staggered scroll reveal, animated `<details>`. All of it is off under `prefers-reduced-motion`.
 
-## 3D mode
+## Background scene (`js/scene/`)
 
-- Opened from the hero or footer, and loaded on demand (about 600 KB of Three.js is never fetched otherwise).
-- A section list (or a chip bar on phones) and clickable labels. Orbits pause while you hover.
-- Escape steps back from the panel, to the overview, then exits.
-- Respects `prefers-reduced-motion` (static scene, instant camera). Phones and low-memory devices get a lighter scene.
+One fixed WebGL canvas sits behind the content. Scroll position maps to a point on a Catmull-Rom camera path through
+one planet per section, and the camera eases toward it every frame. Native scrolling is never intercepted.
+
+| Section | Planet |
+|---|---|
+| Hero | Wide establishing shot of the whole system, slowly orbiting |
+| Experience | Rocky, cratered world; one moon per role, the current role's moon pulses orange |
+| Freelance & Services | Ocean world with a separate drifting cloud layer |
+| Projects | Banded gas giant with canvas-generated rings; one moon per project, brightening when its row is open |
+| Skills | Icy world with soft cracks |
+| Education | Dune desert world |
+| Certificates | Small cratered moon, only while that section is shown |
+| About | Terran world: continents, shallows, ice caps, clouds |
+| Contact | Small moon with an orbiting relay satellite, then a final pull-back wide shot |
+
+- **Rendering:** three.js 0.186.1 as ES modules via the import map in `index.html` (jsDelivr, pinned). Surfaces are
+  procedural GLSL (3D simplex noise + fbm, Ashima Arts / Stefan Gustavson, MIT). No textures are shipped.
+- **Light theme:** the scene switches to an ink-on-paper "star chart" (contours, hatching, graticule) rather than an inverted dark render.
+- **Performance:** built after `load` + idle so it never affects first paint. DPR capped (1.5 desktop, 1 mobile), fewer
+  octaves/segments/stars on phones, renders at ~30fps once the camera settles, pauses when the tab is hidden.
+  On start it times a few frames and drops bloom, then resolution, if the GPU can't hold ~8ms/frame.
+- **Fallbacks:** reduced motion shows one still per section with a cross-fade. With JS off, or without WebGL2 (required by
+  current three.js), a static CSS starfield is shown instead. The content works the same either way.

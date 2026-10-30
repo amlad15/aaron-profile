@@ -347,7 +347,7 @@ export async function start({ canvas, isChart }) {
   function loop(now) {
     raf = 0;
     if (document.hidden) return;
-    const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
+    const dt = last ? Math.min(0.1, (now - last) / 1000) : 0;   // cap so a stalled frame never teleports the camera
     last = now;
     const target = scrollToK(scrollY);
     if (reduced) {
