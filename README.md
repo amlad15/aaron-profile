@@ -24,6 +24,9 @@ Conventions in `content.js`:
 - `// TODO:` comments list what's still open (summarised at the top of the file).
 - `repoPublic: false` / `liveReady: false` keep a link in the data but hide its button.
 - `image: null` shows a placeholder. Add screenshots per `assets/projects/README.txt`.
+- Projects (the "mission log"): `launch: "YYYY-MM"` sets the row date (`null` shows a dash), `result` is the one-line outcome
+  shown while collapsed (facts only), and `minor: true` moves a project into *Side missions*.
+- `profile.status` is a list; each item becomes one part of the hero status line.
 - Certificates only appear once their file is a real PDF (see `assets/certificates/README.txt`).
 
 ## Preview locally
@@ -54,6 +57,13 @@ assets/               resume, certificates, project screenshots, social preview 
 
 Every section and card has a link: `#projects`, `#projects/gcid`, `#experience/guidepost`,
 `#services/aerocool-case`. `#3d` opens the 3D mode.
+
+## Design system
+
+- **Type:** Big Shoulders Display (headings), Public Sans (body), IBM Plex Mono (metadata only: dates, stacks, labels).
+- **Colour:** near-black or warm paper, plus one accent (international orange) used for the status beacon, current role, open rows and primary actions.
+- **Themes:** follows the system setting; the header toggle overrides it and remembers the choice.
+- **Motion:** one easing curve. Hero intro under 1.2s, staggered scroll reveal, animated `<details>`, View Transitions into 3D. All of it is off under `prefers-reduced-motion`.
 
 ## 3D mode
 
