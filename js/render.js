@@ -78,27 +78,11 @@ var SiteRender = (function () {
   }
 
   /* ── Hero ──────────────────────────────────────────────────────────── */
-  // Decorative nod to the 3D mode: a tilted orrery, moons riding SMIL paths
-  function orbitDiagram() {
-    const orbits = [[96, 36, 26, true], [150, 56, 44], [204, 76, 70]];   // rx, ry, seconds per lap, accent moon
-    const path = (rx, ry) => `M${220 - rx} 220a${rx} ${ry} 0 1 0 ${rx * 2} 0a${rx} ${ry} 0 1 0 ${-rx * 2} 0`;
-    return `<svg class="hero-orbit" viewBox="0 0 440 440" aria-hidden="true" focusable="false">
-    <g transform="rotate(-16 220 220)">
-      ${orbits.map(([rx, ry]) => `<ellipse cx="220" cy="220" rx="${rx}" ry="${ry}"/>`).join('')}
-      <line class="hero-orbit-axis" x1="0" y1="220" x2="440" y2="220"/>
-      <circle class="hero-orbit-sun" cx="220" cy="220" r="7"/>
-      ${orbits.map(([rx, ry, dur, accent], i) => `<circle class="${accent ? 'hero-orbit-moon is-accent' : 'hero-orbit-moon'}" r="${accent ? 4.5 : 3}"><animateMotion dur="${dur}s" begin="-${i * 9}s" repeatCount="indefinite" path="${path(rx, ry)}"/></circle>`).join('')}
-    </g>
-  </svg>`;
-  }
-
   function hero(site) {
     const p = site.profile, now = site.experience[0], edu = site.education[0];
     const status = (Array.isArray(p.status) ? p.status : [p.status]).filter(Boolean);
     return `
 <section id="top" class="hero" aria-labelledby="hero-title">
-  <canvas class="starfield" aria-hidden="true"></canvas>
-  ${orbitDiagram()}
   <div class="wrap hero-grid">
     <p class="kicker" data-intro="0">Flight record</p>
     <h1 id="hero-title" class="hero-name" data-intro="1">${esc(p.name)}</h1>
@@ -115,10 +99,6 @@ var SiteRender = (function () {
         <div><dt>Current</dt><dd>${esc(now.role)}, ${esc(now.org.replace(/ (Ltd\.|Inc\.)$/, ''))}</dd></div>
         <div><dt>Training</dt><dd>${esc(edu.degree)}, ${esc(edu.school)}${edu.end ? ` · ${esc(edu.end)}` : ''}</dd></div>
       </dl>
-      <button type="button" class="explore" data-open-3d hidden>
-        <svg class="explore-orbit" viewBox="0 0 48 48" aria-hidden="true"><circle class="explore-sun" cx="24" cy="24" r="4"/><ellipse cx="24" cy="24" rx="20" ry="8"/><g class="explore-path"><circle class="explore-moon" cx="44" cy="24" r="2.75"/></g></svg>
-        <span class="explore-text">Explore in 3D<span class="explore-sub">This portfolio as a solar system</span></span>
-      </button>
     </div>
   </div>
 </section>`;

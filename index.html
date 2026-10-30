@@ -65,15 +65,6 @@
 <!-- build:main -->
 
 <section id="top" class="hero" aria-labelledby="hero-title">
-  <canvas class="starfield" aria-hidden="true"></canvas>
-  <svg class="hero-orbit" viewBox="0 0 440 440" aria-hidden="true" focusable="false">
-    <g transform="rotate(-16 220 220)">
-      <ellipse cx="220" cy="220" rx="96" ry="36"/><ellipse cx="220" cy="220" rx="150" ry="56"/><ellipse cx="220" cy="220" rx="204" ry="76"/>
-      <line class="hero-orbit-axis" x1="0" y1="220" x2="440" y2="220"/>
-      <circle class="hero-orbit-sun" cx="220" cy="220" r="7"/>
-      <circle class="hero-orbit-moon is-accent" r="4.5"><animateMotion dur="26s" begin="-0s" repeatCount="indefinite" path="M124 220a96 36 0 1 0 192 0a96 36 0 1 0 -192 0"/></circle><circle class="hero-orbit-moon" r="3"><animateMotion dur="44s" begin="-9s" repeatCount="indefinite" path="M70 220a150 56 0 1 0 300 0a150 56 0 1 0 -300 0"/></circle><circle class="hero-orbit-moon" r="3"><animateMotion dur="70s" begin="-18s" repeatCount="indefinite" path="M16 220a204 76 0 1 0 408 0a204 76 0 1 0 -408 0"/></circle>
-    </g>
-  </svg>
   <div class="wrap hero-grid">
     <p class="kicker" data-intro="0">Flight record</p>
     <h1 id="hero-title" class="hero-name" data-intro="1">Aaron Lad</h1>
@@ -90,10 +81,6 @@
         <div><dt>Current</dt><dd>IT Consultant, Aerocool System Air Solutions</dd></div>
         <div><dt>Training</dt><dd>BSc Computing Science, University of Alberta · Expected Dec 2026</dd></div>
       </dl>
-      <button type="button" class="explore" data-open-3d hidden>
-        <svg class="explore-orbit" viewBox="0 0 48 48" aria-hidden="true"><circle class="explore-sun" cx="24" cy="24" r="4"/><ellipse cx="24" cy="24" rx="20" ry="8"/><g class="explore-path"><circle class="explore-moon" cx="44" cy="24" r="2.75"/></g></svg>
-        <span class="explore-text">Explore in 3D<span class="explore-sub">This portfolio as a solar system</span></span>
-      </button>
     </div>
   </div>
 </section>
@@ -483,26 +470,10 @@
   <footer class="site-footer">
     <div class="wrap footer-inner">
       <p>© <span data-year>2026</span> Aaron Lad · Built by hand in plain HTML, CSS and JavaScript.</p>
-      <p class="footer-links"><a class="link" href="#top">Back to top</a><button type="button" class="link link-btn" data-open-3d hidden>Explore in 3D</button></p>
+      <p class="footer-links"><a class="link" href="#top">Back to top</a></p>
     </div>
   </footer>
 
-  <!-- 3D mode shell: empty until opened; its CSS and scripts load on demand -->
-  <dialog id="space" class="space" aria-label="3D solar system view of this portfolio">
-    <canvas id="space-canvas" tabindex="0" aria-label="3D view. Use the section list to navigate; arrow keys rotate, plus and minus zoom."></canvas>
-    <div id="space-labels" class="space-labels"></div>
-    <div class="space-bar">
-      <p class="space-title">Explore in 3D</p>
-      <button type="button" class="space-btn" data-space-overview hidden>← Overview</button>
-      <button type="button" class="space-btn space-exit" data-space-exit>Exit 3D <span aria-hidden="true">✕</span></button>
-    </div>
-    <nav class="space-nav" aria-label="3D sections"><ul id="space-list"></ul></nav>
-    <aside id="space-panel" class="space-panel" aria-live="polite" hidden>
-      <button type="button" class="space-close" data-space-close aria-label="Close details">✕</button>
-      <div id="space-panel-body"></div>
-    </aside>
-    <p class="space-status" data-space-status role="status">Loading 3D scene…</p>
-  </dialog>
 
   <script src="js/content.js" defer></script>
   <script src="js/render.js" defer></script>

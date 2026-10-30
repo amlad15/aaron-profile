@@ -1,5 +1,5 @@
 /* site.css: "Mission log". Typography-led, one accent (international orange, the colour of flight hardware).
-   3D mode styles live in 3d.css and load on demand. */
+   The scroll-driven solar system behind the page is js/scene/; its layering lives at the end of this file. */
 
 /* ── Tokens ───────────────────────────────────────────────────────────── */
 :root {
@@ -13,6 +13,7 @@
   --muted:       #96928A;
   --accent:      #FF6A2B;   /* the only colour on the page */
   --accent-ink:  #160700;   /* text on accent fills */
+  --accent-hover:#FF8A57;
   --star:        236, 232, 223;   /* rgb triplet for the hero canvas */
   --hatch:       rgba(236, 232, 223, .05);
 
@@ -26,9 +27,6 @@
   --gutter:   16px;
   --col-gap:  24px;
 
-  /* Aliases kept for css/3d.css */
-  --surface: var(--bg-raised); --surface-2: #1A1D21; --border: var(--rule);
-  --font-head: var(--font-display); --accent-hover: #FF8A57;
   color-scheme: dark;
 }
 
@@ -38,7 +36,7 @@
     --bg: #F3F0E8; --bg-raised: #EAE6DB; --rule: #D9D3C5; --rule-strong: #B9B2A2; --control: #857F72;
     --text: #17181B; --text-soft: #33353A; --muted: #5E5A52;
     --accent: #B4380A; --accent-ink: #FFF8F3; --star: 23, 24, 27; --hatch: rgba(23, 24, 27, .05);
-    --surface-2: #E1DCD0; --accent-hover: #93300B;
+    --accent-hover: #93300B;
     color-scheme: light;
   }
 }
@@ -46,7 +44,7 @@
   --bg: #F3F0E8; --bg-raised: #EAE6DB; --rule: #D9D3C5; --rule-strong: #B9B2A2; --control: #857F72;
   --text: #17181B; --text-soft: #33353A; --muted: #5E5A52;
   --accent: #B4380A; --accent-ink: #FFF8F3; --star: 23, 24, 27; --hatch: rgba(23, 24, 27, .05);
-  --surface-2: #E1DCD0; --accent-hover: #93300B;
+  --accent-hover: #93300B;
   color-scheme: light;
 }
 
@@ -169,11 +167,9 @@ main:focus { outline: none; }                                /* only reached via
 .link:hover { text-decoration-color: var(--accent); }
 .link .icon { width: .9em; height: .9em; transition: transform .25s var(--ease); }
 .link:hover .icon { transform: translate(2px, -2px); }
-.link-btn { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
 
 /* ── Hero ─────────────────────────────────────────────────────────────── */
 .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--rule); }
-.starfield { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
 .hero-grid {
   position: relative; display: grid; gap: 22px; align-content: end;
   min-height: clamp(560px, calc(100svh - var(--header-h)), 900px);
@@ -203,42 +199,7 @@ main:focus { outline: none; }                                /* only reached via
 .manifest dt { color: var(--muted); text-transform: uppercase; letter-spacing: .12em; padding-top: 2px; }
 .manifest dd { font-size: .9375rem; color: var(--text-soft); }
 
-.explore {
-  display: inline-flex; align-items: center; gap: 14px; min-height: 56px; padding: 6px 18px 6px 10px; cursor: pointer;
-  background: none; color: var(--text); border: 1px solid var(--control); border-radius: 2px; text-align: left;
-  transition: border-color .25s var(--ease);
-}
-.explore:hover { border-color: var(--accent); }
-.explore-orbit { width: 44px; height: 44px; flex: none; overflow: visible; }
-.explore-orbit ellipse { fill: none; stroke: var(--rule-strong); stroke-width: 1; }
-.explore-sun { fill: var(--text); }
-.explore-moon { fill: var(--accent); }
-.explore-path { transform-origin: 24px 24px; transform: scaleY(.4); }   /* squash a circular path into the ellipse */
-@media (prefers-reduced-motion: no-preference) {
-  .explore-moon { transform-origin: 24px 24px; animation: orbit 9s linear infinite; }
-  .explore:hover .explore-moon { animation-duration: 3s; }
-  @keyframes orbit { to { transform: rotate(360deg); } }
-}
-.explore-text { display: grid; font: 600 1rem/1.2 var(--font-body); }
-.explore-sub { font: 400 .8125rem/1.4 var(--font-body); color: var(--muted); }
 
-/* Orrery on the right of wide heroes; hidden on small screens where it would crowd the name */
-.hero-orbit { display: none; }
-@media (min-width: 1024px) {
-  .hero-orbit {
-    display: block; position: absolute; right: max(-60px, calc((100vw - 1240px) / 2 - 40px)); top: 46%;
-    width: min(46vw, 600px); translate: 0 -50%; pointer-events: none;
-  }
-  .hero-orbit ellipse { fill: none; stroke: var(--rule-strong); stroke-width: 1; }
-  .hero-orbit-axis { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 2 6; }
-  .hero-orbit-sun { fill: var(--text); }
-  .hero-orbit-moon { fill: var(--muted); }
-  .hero-orbit-moon.is-accent { fill: var(--accent); }
-  .hero-pitch, .status { position: relative; }               /* stay above the diagram */
-}
-@media (prefers-reduced-motion: no-preference) {
-  .hero-orbit { animation: intro 1s var(--ease) .3s both; }
-}
 
 /* Intro sequence: whole thing lands by ~1.05s */
 @media (prefers-reduced-motion: no-preference) {
@@ -425,13 +386,6 @@ main:focus { outline: none; }                                /* only reached via
   .reveal-ready [data-reveal].is-in { opacity: 1; transform: none; }
 }
 
-/* ── View Transitions for opening/closing 3D mode ─────────────────────── */
-@media (prefers-reduced-motion: no-preference) {
-  ::view-transition-old(root) { animation: vt-out .35s var(--ease) both; }
-  ::view-transition-new(root) { animation: vt-in .45s var(--ease) both; }
-  @keyframes vt-out { to { opacity: 0; transform: scale(.985); } }
-  @keyframes vt-in { from { opacity: 0; transform: scale(1.015); } }
-}
 
 @media (min-width: 768px) { :root { --gutter: 32px; } }
 @media (min-width: 1280px) { :root { --gutter: 48px; } }

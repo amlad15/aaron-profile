@@ -110,7 +110,6 @@
   function followHash() {
     const id = decodeURIComponent(location.hash.slice(1));
     if (!id) return;
-    if (id === '3d') { open3D(); return; }
     const el = document.getElementById(id);
     if (!el) return;
     $$('.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
@@ -124,58 +123,6 @@
     }
   }
   window.addEventListener('hashchange', followHash);
-
-  /* ── Hero starfield: slow drift, cheap, pauses off-screen ──────────── */
-  (function starfield() {
-    const canvas = $('.starfield');
-    if (!canvas || !canvas.getContext) return;
-    const ctx = canvas.getContext('2d');
-    let stars = [], w = 0, h = 0, raf = 0, visible = true, last = 0;
-    function size() {
-      const dpr = Math.min(devicePixelRatio || 1, 2);
-      w = canvas.clientWidth; h = canvas.clientHeight;
-      canvas.width = w * dpr; canvas.height = h * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const n = Math.round(Math.min(220, w * h / 6500));      // density scales with area, capped for big screens
-      stars = Array.from({ length: n }, () => ({
-        x: Math.random() * w, y: Math.random() * h,
-        r: Math.random() < .08 ? 1.3 : .6 + Math.random() * .5,
-        z: .25 + Math.random() * .75,                         // depth: nearer stars drift faster and brighter
-        tw: Math.random() * Math.PI * 2
-      }));
-    }
-    function draw(t) {
-      const rgb = getComputedStyle(root).getPropertyValue('--star').trim() || '236, 232, 223';
-      ctx.clearRect(0, 0, w, h);
-      for (const s of stars) {
-        const a = (.25 + .55 * s.z) * (.8 + .2 * Math.sin(t / 1400 + s.tw));
-        ctx.fillStyle = `rgba(${rgb}, ${a.toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
-      }
-    }
-    function tick(t) {
-      const dt = Math.min(64, t - (last || t)); last = t;
-      for (const s of stars) { s.x -= s.z * dt * .006; if (s.x < -2) { s.x = w + 2; s.y = Math.random() * h; } }   // ~6px/s at full depth
-      draw(t);
-      raf = requestAnimationFrame(tick);
-    }
-    function run() {
-      cancelAnimationFrame(raf); last = 0;
-      if (reduced.matches) { draw(0); return; }               // static sky
-      if (visible && !document.hidden) raf = requestAnimationFrame(tick);
-    }
-    size(); run();
-    new IntersectionObserver(([en]) => { visible = en.isIntersecting; run(); }).observe(canvas);
-    document.addEventListener('visibilitychange', run);
-    reduced.addEventListener('change', run);
-    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { size(); run(); }, 150); });
-    new MutationObserver(() => { if (!raf || reduced.matches) draw(0); }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });   // recolour a static sky on theme change
-  }());
-
-  /* SMIL ignores CSS media queries, so pause the hero orrery by hand */
-  const orrery = $('.hero-orbit');
-  const syncOrrery = () => orrery && orrery.pauseAnimations && (reduced.matches ? orrery.pauseAnimations() : orrery.unpauseAnimations());
-  syncOrrery(); reduced.addEventListener('change', syncOrrery);
 
   /* ── Certificates: publish only real PDFs ──────────────────────────── */
   // The repo ships 52-byte text placeholders; a cert appears automatically once its file starts with %PDF-
@@ -196,75 +143,6 @@
       }
       return verified;
     });
-
-  /* ── 3D mode (loaded only when opened) ─────────────────────────────── */
-  const dialog = $('#space');
-  const hasWebGL = (() => {
-    try { const c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); }
-    catch (_) { return false; }
-  })();
-
-  const SCRIPTS_3D = [
-    'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
-    'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js',
-    'js/3d/scene-data.js', 'js/3d/solar-system.js', 'js/3d/particles.js',
-    'js/3d/camera.js', 'js/3d/ui.js', 'js/3d/interactions.js', 'js/3d/main.js'
-  ];
-  let loading3D = null;
-
-  function loadScript(src) {
-    return new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = src; s.async = false;                          // keep execution order
-      s.onload = res; s.onerror = () => rej(new Error('Could not load ' + src));
-      document.head.appendChild(s);
-    });
-  }
-  function load3D() {
-    if (loading3D) return loading3D;
-    const css = document.createElement('link');
-    css.rel = 'stylesheet'; css.href = 'css/3d.css';
-    document.head.appendChild(css);
-    loading3D = SCRIPTS_3D.reduce((p, src) => p.then(() => loadScript(src)), Promise.resolve());
-    return loading3D;
-  }
-
-  // View Transitions where supported; plain swap otherwise or with reduced motion
-  const transition = fn => (document.startViewTransition && !reduced.matches) ? document.startViewTransition(fn) : fn();
-
-  function open3D() {
-    if (!hasWebGL || dialog.open) return;
-    setMenu(false);
-    transition(() => dialog.showModal());
-    const status = $('[data-space-status]', dialog);
-    status.hidden = false;
-    status.textContent = 'Loading 3D scene…';
-    Promise.all([load3D(), certsReady])
-      .then(([, certs]) => { window.Space.start(dialog, certs); status.hidden = true; })
-      .catch(err => {
-        console.error('[3d]', err);
-        status.textContent = '3D mode could not load. Press Exit to return to the site.';
-        loading3D = null;                                    // allow a retry next time
-      });
-  }
-  const close3D = () => transition(() => dialog.close());
-
-  if (hasWebGL) $$('[data-open-3d]').forEach(b => { b.hidden = false; b.addEventListener('click', open3D); });
-  $('[data-space-exit]', dialog).addEventListener('click', close3D);
-  dialog.addEventListener('close', () => {
-    if (window.Space) window.Space.stop();                   // stop the render loop; nothing runs while closed
-    if (location.hash === '#3d') history.replaceState(null, '', location.pathname + location.search);
-  });
-
-  // Links inside 3D that point at page sections: close the dialog first, then jump
-  dialog.addEventListener('click', e => {
-    const a = e.target.closest('a[href^="#"]');
-    if (!a) return;
-    e.preventDefault();
-    dialog.close();
-    setTimeout(() => { location.hash = a.getAttribute('href'); followHash(); }, 0);  // after focus is restored to the opener
-  });
 
   if (location.hash) followHash();
 }());

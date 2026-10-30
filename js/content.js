@@ -1,6 +1,6 @@
 /**
  * content.js: the single source of portfolio content.
- * Read by the page (js/site.js), the 3D mode (js/3d/*) and tools/render.mjs,
+ * Read by the page (js/site.js), the background scene (js/scene/) and tools/render.mjs,
  * which writes it into index.html so the content is there with JS off.
  *
  * After editing, run:  node tools/render.mjs
