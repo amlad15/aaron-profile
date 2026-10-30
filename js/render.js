@@ -46,9 +46,9 @@ var SiteRender = (function () {
     ? `<ul class="stack" aria-label="Stack">${list.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
 
   // Same 16:10 box with or without an image, so adding screenshots later causes no layout shift
-  function shot(image, title) {
+  function shot(image, title, alt) {
     return image
-      ? `<figure class="shot"><img src="${esc(image)}" alt="Screenshot of ${esc(title)}" width="1600" height="1000" loading="lazy" decoding="async"></figure>`
+      ? `<figure class="shot"><img src="${esc(image)}" alt="${esc(alt || 'Screenshot of ' + title)}" width="1200" height="750" loading="lazy" decoding="async"></figure>`   // width/height reserve the 16:10 box before load
       : `<figure class="shot shot--empty" aria-hidden="true"><span>Screenshot pending</span></figure>`;
   }
 
@@ -158,7 +158,7 @@ var SiteRender = (function () {
           ${bullets(cs.points)}
           ${ext(cs.href, `Visit ${esc(cs.title)}`)}
         </div>
-        ${shot(cs.image, cs.title)}
+        ${shot(cs.image, cs.title, cs.imageAlt)}
       </article>
       <p class="track" data-reveal>${esc(s.trackRecord)}</p>
       <p class="cta" data-reveal><a class="btn btn--primary btn--lg" href="${esc(mailto(p.email, s.cta.subject))}">${esc(s.cta.label)}</a></p>`,
@@ -189,7 +189,7 @@ var SiteRender = (function () {
               ${stack(pr.tags)}
               <p class="m-links">${links.join('')}<a class="permalink" href="#projects/${esc(pr.id)}">Link to this mission</a></p>
             </div>
-            ${shot(pr.image, pr.title)}
+            ${shot(pr.image, pr.title, pr.imageAlt)}
           </div>
         </details>
       </li>`;

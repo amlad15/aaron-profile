@@ -16,7 +16,7 @@
  *   3. projects yt-spotify: live demo is behind Vercel login (liveReady: false hides it)
  *   4. projects gitabot: github.com/amlad15/gita_bot is private/404 (repoPublic: false)
  *   5. projects admin-crm, cultural-archive: dates unknown (null hides them)
- *   6. projects *: add screenshots to assets/projects/ and set `image`
+ *   6. projects gcid, deepforge, yt-spotify, admin-crm, cultural-archive, gitabot + aerocool case study: screenshots still needed
  *   7. certificates: all 9 PDFs are placeholders, so they stay hidden until replaced
  *
  * Privacy: never name GuidePost's clients anywhere (text, alt text, filenames, meta).
@@ -194,7 +194,8 @@ var SITE = {                                                  // var so Node's v
       ],
       tags:  ["Python", "Streamlit", "Matplotlib", "NumPy", "Algorithms"],
       repo:  "https://github.com/amlad15/Algorithm-Visual-Playground",
-      image: null                                           // TODO: screenshot
+      image: "assets/projects/algo-playground.webp",
+      imageAlt: "Algorithm Visual Playground sorting tab mid-run: a bar chart of 30 values with Bubble Sort comparing two highlighted bars",
     },
     {
       id:       "admin-crm",
@@ -257,7 +258,8 @@ var SITE = {                                                  // var so Node's v
       tags:  ["AI", "Content Creation", "Automation", "Video"],
       live:  "https://www.youtube.com/@infodumperca",
       liveLabel: "Watch on YouTube",
-      image: null
+      image: "assets/projects/infodumper.webp",
+      imageAlt: "The Infodumper YouTube channel page showing its logo and a grid of illustrated Shorts thumbnails",
     }
   ],
 
