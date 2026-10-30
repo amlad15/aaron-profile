@@ -1,9 +1,14 @@
 /* 3d.css: "Explore in 3D" dialog. Loaded on first open; reuses the tokens from site.css. */
 
 .space {
+  /* Space is always dark, whatever the page theme */
+  --bg: #0B0C0E; --surface: #131518; --surface-2: #1A1D21; --border: #2A2D33; --rule-strong: #3A3E45;
+  --text: #ECE8DF; --text-soft: #C4C0B6; --muted: #96928A;
+  --accent: #FF6A2B; --accent-hover: #FF8A57; --accent-ink: #160700;
+  color-scheme: dark;
   position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none;
   margin: 0; padding: 0; border: 0; overflow: hidden;
-  background: #05070F; color: var(--text); font-family: var(--font-body);
+  background: #05070F; color: var(--text); font-family: var(--font-body); line-height: 1.5;
 }
 .space::backdrop { background: #05070F; }
 html:has(.space[open]) { overflow: hidden; }   /* no page scrollbar behind the 3D view */
@@ -19,9 +24,9 @@ html:has(.space[open]) { overflow: hidden; }   /* no page scrollbar behind the 3
   background: linear-gradient(#05070Fee, #05070F00); pointer-events: none;   /* drags pass through the gradient */
 }
 .space-bar > * { pointer-events: auto; }
-.space-title { margin: 0 auto 0 0; font: 600 1rem var(--font-head); }
+.space-title { margin: 0 auto 0 0; font: 800 1.25rem/1 var(--font-display); text-transform: uppercase; letter-spacing: .02em; }
 .space-btn {
-  min-height: 44px; padding: 0 16px; border-radius: 10px; cursor: pointer;
+  min-height: 44px; padding: 0 16px; border-radius: 2px; cursor: pointer;
   background: var(--surface); color: var(--text); border: 1px solid var(--border); font: 500 0.9375rem var(--font-body);
 }
 .space-btn:hover { border-color: var(--accent); }
@@ -34,22 +39,22 @@ html:has(.space[open]) { overflow: hidden; }   /* no page scrollbar behind the 3
   position: absolute; left: 0; top: 0; pointer-events: auto; cursor: pointer;
   max-width: 170px; padding: 6px 10px; line-height: 1.25; text-align: center;
   font: 500 0.8125rem var(--font-body); color: var(--text);
-  background: rgba(11, 16, 32, .78); border: 1px solid rgba(255, 255, 255, .08); border-top: 2px solid var(--c);
-  border-radius: 8px; white-space: normal;                 /* wrap long names instead of truncating them */
+  background: rgba(11, 12, 14, .8); border: 1px solid rgba(255, 255, 255, .08); border-top: 2px solid var(--c);
+  border-radius: 2px; white-space: normal;                 /* wrap long names instead of truncating them */
 }
 .space-label::after { content: ''; position: absolute; inset: -7px; }   /* invisible padding to reach 44px */
-.space-label:hover { background: rgba(24, 34, 58, .95); }
+.space-label:hover { background: rgba(26, 29, 33, .95); }
 .space-label--moon { font-size: 0.75rem; max-width: 150px; }
 
 /* Section list */
 .space-nav {
   position: absolute; z-index: 3; left: 16px; top: 72px; width: 230px; max-height: calc(100% - 96px); overflow: auto;
-  padding: 8px; background: rgba(19, 27, 47, .9); border: 1px solid var(--border); border-radius: 14px;
+  padding: 8px; background: rgba(19, 21, 24, .92); border: 1px solid var(--border); border-radius: 2px;
 }
 .space-nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .space-nav button {
   display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 6px 12px;
-  background: none; border: 0; border-radius: 8px; color: var(--text); text-align: left; cursor: pointer;
+  background: none; border: 0; border-radius: 2px; color: var(--text); text-align: left; cursor: pointer;
   font: 500 0.9375rem/1.3 var(--font-body);
 }
 .space-nav button:hover { background: var(--surface-2); }
@@ -65,25 +70,27 @@ html:has(.space[open]) { overflow: hidden; }   /* no page scrollbar behind the 3
 .space-panel {
   position: absolute; z-index: 5; right: 16px; top: 72px; bottom: 16px; width: min(420px, calc(100% - 32px));
   overflow: auto; overscroll-behavior: contain; padding: 22px 24px 28px;
-  background: rgba(13, 19, 36, .97); border: 1px solid var(--border); border-top: 3px solid var(--c); border-radius: 14px;
+  background: rgba(13, 14, 16, .97); border: 1px solid var(--border); border-top: 3px solid var(--c); border-radius: 2px;
 }
 .space-close {
-  position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 10px; cursor: pointer;
+  position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 2px; cursor: pointer;
   background: none; border: 1px solid transparent; color: var(--muted); font-size: 1.125rem;
 }
 .space-close:hover { color: var(--text); border-color: var(--border); }
-.space-panel h2 { font-size: 1.5rem; margin: 4px 44px 8px 0; }
+.space-panel h2 { font: 800 2rem/.95 var(--font-display); text-transform: uppercase; margin: 6px 44px 10px 0; }
 .space-panel h2:focus { outline: none; }
 .space-panel p { color: var(--text-soft); }
 .space-kicker { font: 500 0.75rem var(--font-mono); text-transform: uppercase; letter-spacing: .12em; color: var(--c) !important; margin: 0; }
 .space-sub { font-weight: 500; color: var(--text) !important; margin-bottom: 4px; }
-.space-meta { font: 400 0.8125rem var(--font-mono); color: var(--muted) !important; }
-.space-bullets { margin: 12px 0; padding-left: 18px; display: grid; gap: 6px; color: var(--text-soft); }
+.space-meta { font: 400 0.8125rem var(--font-mono); color: var(--muted) !important; margin-bottom: 10px; }
+.space-bullets { margin: 12px 0; padding: 0; display: grid; gap: 6px; color: var(--text-soft); }
+.space-bullets li { position: relative; padding-left: 18px; }
+.space-bullets li::before { content: ''; position: absolute; left: 0; top: .75em; width: 9px; height: 1px; background: var(--muted); }   /* page CSS strips list markers, so draw the same dash as the page */
 .space-tags { list-style: none; padding: 0; margin: 14px 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .space-tags li { font: 400 0.8125rem var(--font-mono); padding: 3px 10px; border: 1px solid var(--border); border-radius: 999px; color: var(--text-soft); }
 .space-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .space-link {
-  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 10px;
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 2px;
   background: var(--surface); border: 1px solid var(--border); color: var(--text); text-decoration: none; overflow-wrap: anywhere;
 }
 .space-link:hover { border-color: var(--c); color: var(--text); }
@@ -91,7 +98,7 @@ html:has(.space[open]) { overflow: hidden; }   /* no page scrollbar behind the 3
 
 .space-status {
   position: absolute; z-index: 6; left: 50%; top: 50%; translate: -50% -50%; margin: 0;
-  padding: 14px 20px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); text-align: center;
+  padding: 14px 20px; border-radius: 2px; background: var(--surface); border: 1px solid var(--border); text-align: center;
 }
 
 /* Phones: list becomes a bottom chip bar, panel a bottom sheet above it */

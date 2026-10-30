@@ -97,7 +97,7 @@ class InteractionHandler {
   /* ── Actions (shared by canvas, labels and the side list) ───────────── */
 
   selectSun() {
-    this.ui.showPanel(this.scene.sun.panel, '#F5B544');
+    this.ui.showPanel(this.scene.sun.panel, '#FF6A2B');
   }
 
   selectPlanet(planetId) {

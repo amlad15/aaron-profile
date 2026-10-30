@@ -52,7 +52,7 @@ class SpaceUI {
     this.overview.hidden = !p;
     if (!p) {
       this.list.innerHTML =
-        `<li><button type="button" data-act="sun" style="--c:#F5B544"><span class="dot" aria-hidden="true"></span>About <span class="hint">the sun</span></button></li>` +
+        `<li><button type="button" data-act="sun" style="--c:#FF6A2B"><span class="dot" aria-hidden="true"></span>About <span class="hint">the sun</span></button></li>` +
         this.scene.planets.map(pl =>
           `<li><button type="button" data-act="planet" data-id="${esc(pl.id)}" style="--c:${SpaceUI.hex(pl.color)}">` +
           `<span class="dot" aria-hidden="true"></span>${esc(pl.label)} <span class="hint">${pl.moons.length}</span></button></li>`).join('');

@@ -55,7 +55,7 @@
     /* Labels: real buttons, so clicking a name works (it used to be pointer-events:none) */
     const planetLabels = scene3d.planets.map(pd =>
       ({ id: pd.id, el: ui.makeLabel(pd.label, SpaceUI.hex(pd.color), { act: 'planet', id: pd.id }) }));
-    const sunLabel = ui.makeLabel('About', '#F5B544', { act: 'sun' });
+    const sunLabel = ui.makeLabel('About', '#FF6A2B', { act: 'sun' });
     const moonLabels = solarSystem.getAllMoonObjects().map(({ moonObj, planetId }) => ({
       moonObj, planetId,
       el: ui.makeLabel(moonObj.data.title, SpaceUI.hex(solarSystem.getPlanetData(planetId).color),
