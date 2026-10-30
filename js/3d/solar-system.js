@@ -1,7 +1,7 @@
 /**
  * solar-system.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Builds and animates the entire 3D solar system:
+ * Builds and animates the 3D solar system from buildScene() data:
  *   • The Sun (textured canvas sphere + glow shells + point light)
  *   • Seven planets with richly-textured canvas surfaces
  *   • Atmosphere glow shells on every planet
@@ -10,28 +10,6 @@
  * All textures are procedurally generated — zero external URLs.
  * ─────────────────────────────────────────────────────────────────────────────
  */
-
-/* ── Planet id → canvas texture type ──────────────────────────────────────── */
-const PLANET_TEXTURE_TYPE = {
-  nexus:   'mars',
-  forge:   'neptune',
-  matrix:  'toxic',
-  citadel: 'earth',
-  pulse:   'jupiter',
-  signal:  'ice',
-  vault:   'volcanic',
-};
-
-/* ── Atmosphere config per planet ──────────────────────────────────────────── */
-const PLANET_ATMO = {
-  nexus:   { color: 0xff2200, opacity: 0.18 },
-  forge:   { color: 0x0055ff, opacity: 0.20 },
-  matrix:  { color: 0x00ff44, opacity: 0.15 },
-  citadel: { color: 0x4499ff, opacity: 0.18 },
-  pulse:   { color: 0xff8833, opacity: 0.15 },
-  signal:  { color: 0x00ffee, opacity: 0.18 },
-  vault:   { color: 0xffaa00, opacity: 0.15 },
-};
 
 /* ══════════════════════════════════════════════════════════════════════════════
    PROCEDURAL PLANET TEXTURES (512 × 512 canvas, all drawn CPU-side)
@@ -482,8 +460,12 @@ function makePlanetTexture(type) {
 
 class SolarSystem {
 
-  constructor(scene) {
+  constructor(scene, data, opts) {
     this.scene = scene;
+    this.data  = data;
+    this.opts  = opts || {};
+    this.paused = false;                                     // set while the pointer is over something clickable
+    this._seg   = this.opts.lite ? 20 : 32;                  // fewer sphere segments on phones
 
     this._planetMeshes = [];
     this._moonMeshes   = [];
@@ -534,7 +516,7 @@ class SolarSystem {
       metalness:         0.0,
     });
     const coreMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(SUN_RADIUS, 48, 48),
+      new THREE.SphereGeometry(SUN_RADIUS, this._seg + 16, this._seg + 16),
       coreMat
     );
     coreMesh.name     = 'sun';
@@ -602,13 +584,13 @@ class SolarSystem {
   ═══════════════════════════════════════════════════════════════════════════ */
 
   _buildPlanets() {
-    PORTFOLIO_DATA.planets.forEach((data, pIdx) => {
+    this.data.planets.forEach((data, pIdx) => {
       this._planets.push(this._buildSinglePlanet(data, pIdx));
     });
   }
 
   _buildSinglePlanet(data, pIdx) {
-    const startAngle = (pIdx / PORTFOLIO_DATA.planets.length) * Math.PI * 2;
+    const startAngle = (pIdx / this.data.planets.length) * Math.PI * 2;
 
     this._addOrbitRing(data.orbitRadius, data.tilt, data.color);
 
@@ -617,8 +599,7 @@ class SolarSystem {
     this.scene.add(group);
 
     // ── Canvas texture material ──────────────────────────────────────────
-    const texType = PLANET_TEXTURE_TYPE[data.id] || 'moon';
-    const tex     = makePlanetTexture(texType);
+    const tex     = makePlanetTexture(data.texture || 'moon');
 
     const mat = new THREE.MeshStandardMaterial({
       map:               tex,
@@ -629,7 +610,7 @@ class SolarSystem {
     });
 
     const mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(data.size, 32, 32),
+      new THREE.SphereGeometry(data.size, this._seg, this._seg),
       mat
     );
     mesh.name          = `planet-${data.id}`;
@@ -644,10 +625,7 @@ class SolarSystem {
     this._planetMeshes.push(mesh);
 
     // ── Atmosphere glow ──────────────────────────────────────────────────
-    const atmo = PLANET_ATMO[data.id];
-    if (atmo) {
-      this._addAtmosphereGlow(group, data.size, atmo.color, atmo.opacity);
-    }
+    this._addAtmosphereGlow(group, data.size, data.color, 0.16);
 
     // ── Decorative ring (every 3rd planet) ───────────────────────────────
     if (pIdx % 3 === 1) {
@@ -719,7 +697,7 @@ class SolarSystem {
       metalness:         0.0,
     });
     const moonMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(moonSize, 16, 16),
+      new THREE.SphereGeometry(moonSize, this.opts.lite ? 10 : 16, this.opts.lite ? 10 : 16),
       moonMat
     );
     moonMesh.name     = `moon-${moonData.id}`;
@@ -797,7 +775,7 @@ class SolarSystem {
       depthWrite:  false,
     });
     const glowMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(size * 1.15, 32, 32),
+      new THREE.SphereGeometry(size * 1.15, this._seg, this._seg),
       glowMat
     );
     glowMesh.userData = { type: 'ignore' };
@@ -823,6 +801,11 @@ class SolarSystem {
       if (moonObj._tween) moonObj._tween.stop();
       moonObj.group.scale.setScalar(0);
       moonObj.orbitRing.visible = true;
+      if (this.opts.reducedMotion) {                       // no pop-in animation
+        moonObj.group.scale.setScalar(1);
+        moonObj.isVisible = true;
+        return;
+      }
       moonObj._tween = new TWEEN.Tween(target)
         .to({ s: 1 }, 600)
         .delay(delay)
@@ -839,6 +822,12 @@ class SolarSystem {
     planetObj.isFocused = false;
     planetObj.moons.forEach(moonObj => {
       if (moonObj._tween) moonObj._tween.stop();
+      if (this.opts.reducedMotion) {
+        moonObj.group.scale.setScalar(0);
+        moonObj.isVisible = false;
+        moonObj.orbitRing.visible = false;
+        return;
+      }
       const target = { s: moonObj.group.scale.x };
       moonObj._tween = new TWEEN.Tween(target)
         .to({ s: 0 }, 350)
@@ -862,12 +851,13 @@ class SolarSystem {
   ═══════════════════════════════════════════════════════════════════════════ */
 
   update(delta, focusedId) {
-    this._animateSun(delta);
+    const frozen = this.paused || this.opts.reducedMotion;  // hovering = hold still so targets are easy to hit
+    if (!this.opts.reducedMotion) this._animateSun(delta);
 
     this._planets.forEach(planetObj => {
       const data = planetObj.data;
 
-      if (focusedId !== data.id) {
+      if (focusedId !== data.id && !frozen) {
         planetObj.angle += data.orbitSpeed * delta;
       }
 
@@ -879,10 +869,10 @@ class SolarSystem {
         Math.sin(a) * r
       );
 
-      planetObj.mesh.rotation.y += 0.3 * delta;
+      if (!this.opts.reducedMotion) planetObj.mesh.rotation.y += 0.3 * delta;
 
       planetObj.moons.forEach(moonObj => {
-        moonObj.angle += moonObj.orbitSpeed * delta;
+        if (!frozen) moonObj.angle += moonObj.orbitSpeed * delta;
         const ma = moonObj.angle;
         const mr = moonObj.orbitRadius;
         moonObj.group.position.set(
@@ -933,6 +923,12 @@ class SolarSystem {
   getMoonMeshes()   { return this._moonMeshes; }
   getMoonHitboxes() { return this._moonHitboxes; }
 
+  getMoonWorldPosition(moonId, planetId, target) {
+    const p = this._planets.find(p => p.data.id === planetId);
+    const m = p && p.moons.find(m => m.data.id === moonId);
+    return m ? m.group.getWorldPosition(target) : target.set(0, 0, 0);
+  }
+
   getAllMoonObjects() {
     const result = [];
     this._planets.forEach(p => {
@@ -948,7 +944,7 @@ class SolarSystem {
   }
 
   getPlanetData(planetId) {
-    return PORTFOLIO_DATA.planets.find(p => p.id === planetId) || null;
+    return this.data.planets.find(p => p.id === planetId) || null;
   }
 
   getMoonData(moonId, planetId) {

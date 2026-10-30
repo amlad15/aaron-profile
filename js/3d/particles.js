@@ -16,8 +16,9 @@
 
 class ParticleSystem {
 
-  constructor(scene) {
+  constructor(scene, opts) {
     this.scene  = scene;
+    this.opts   = opts || {};
     this.comets = [];
 
     this._time  = 0;
@@ -37,16 +38,18 @@ class ParticleSystem {
     this._asteroids         = [];
     this._foregroundStarMat = null;
 
-    // Build everything
+    // Phones get stars only; the extras are the expensive, purely decorative part
     this._createStarLayers();
-    this._createSpikeStars();
-    this._createNebulaClouds();
-    this._createMilkyWayBand();
-    this._createAsteroidBelt();
-    this._createComets();
-    this._createSagittarius();
-    this._createGalaxy();
-    this._createSkillStars();
+    if (!this.opts.lite) {
+      this._createSpikeStars();
+      this._createNebulaClouds();
+      this._createMilkyWayBand();
+      this._createAsteroidBelt();
+      this._createSagittarius();
+      this._createGalaxy();
+      this._createSkillStars();
+    }
+    if (!this.opts.reducedMotion) this._createComets();
   }
 
   /* ── Glow Sprite Helper ────────────────────────────────────────────────── */
@@ -125,9 +128,10 @@ class ParticleSystem {
       return mat;
     };
 
-    buildLayer(5000, 3600, 0.7,  false);
-    buildLayer(1500, 2000, 1.5,  false);
-    this._foregroundStarMat = buildLayer(300, 1200, 3.5, true);
+    const k = this.opts.lite ? 0.3 : 1;                       // lite: ~30% of the stars
+    buildLayer(Math.round(5000 * k), 3600, 0.7,  false);
+    buildLayer(Math.round(1500 * k), 2000, 1.5,  false);
+    this._foregroundStarMat = buildLayer(Math.round(300 * k), 1200, 3.5, true);
   }
 
   /* ── Diffraction Spike Stars ───────────────────────────────────────────── */
@@ -334,7 +338,7 @@ class ParticleSystem {
     const dummy = new THREE.Object3D();
     for (let i = 0; i < COUNT; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const r     = 172 + (Math.random() - 0.5) * 28;
+      const r     = (this.opts.beltRadius || 600) + (Math.random() - 0.5) * 28;
       dummy.position.set(
         Math.cos(angle) * r,
         (Math.random() - 0.5) * 14,
@@ -611,10 +615,6 @@ class ParticleSystem {
       starGroup.userData.type = 'ignore';
       this.scene.add(starGroup);
 
-      console.log(
-        `[SkillStar] "${skillLabel}" added to scene at`, skillStarPosition.toArray(),
-        '— children:', starGroup.children.map(c => c.constructor.name + (c.userData.type ? `[${c.userData.type}]` : ''))
-      );
 
       window.skillStars.push({
         mesh:        coreSprite,
@@ -732,6 +732,7 @@ class ParticleSystem {
   /* ── Per-Frame Update ──────────────────────────────────────────────────── */
 
   update(delta) {
+    if (this.opts.reducedMotion) return;                     // static sky
     this._time  += delta;
     this._frame += 1;
     const t = this._time;
