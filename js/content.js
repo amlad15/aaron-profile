@@ -27,7 +27,7 @@ var SITE = {                                                  // var so Node's v
   profile: {
     name:     "Aaron Lad",
     pitch:    "Full-stack developer with hands-on IT and sysadmin experience, open to new-grad roles and freelance web projects.",
-    status:   null,                                         // pitch already says it; set a string to show the pill again
+    status:   ["Open to new-grad roles", "Taking freelance web projects", "Edmonton, AB"],   // hero status line, one fact per item
     location: "Edmonton, Alberta, Canada",
     email:    "ladaaron15@gmail.com",
     phone:    "(825) 343-2012",
@@ -127,14 +127,16 @@ var SITE = {                                                  // var so Node's v
     cta: { label: "Start a project", subject: "Website project" }
   },
 
-  /* featured: true = large card. image: path under assets/projects/ or null for a placeholder. */
+  /* Mission log. featured: true = lead missions; result = the collapsed row's outcome line (facts only).
+     image: path under assets/projects/ or null for a placeholder. */
   projects: [
     {
       id:       "gcid",
+      launch:   "2026-01",               // YYYY-MM; drives the row date
+      result:   "4 external APIs, sub-second updates",
       title:    "Global Conflict Intelligence Dashboard",
       summary:  "Real-time OSINT map of live aircraft, ships, conflict events and breaking news.",
       dates:    "Jan – Mar 2026",
-      featured: true,
       bullets: [
         "Integrated 4 external APIs (OpenSky, AISStream, ACLED, GDELT) with WebSocket streaming for sub-second live updates.",
         "PostGIS spatial queries and anomaly detection across 200+ daily events.",
@@ -146,10 +148,11 @@ var SITE = {                                                  // var so Node's v
     },
     {
       id:       "deepforge",
+      launch:   "2026-02",               // YYYY-MM; drives the row date
+      result:   "4-agent dev pipeline, fully local",
       title:    "DeepForge",
       summary:  "Multi-agent AI system that simulates a small software engineering team.",
       dates:    "Feb 2026",
-      featured: true,
       bullets: [
         "Four CrewAI agents (Planner, Coder, Reviewer, Builder) each own one stage of development.",
         "Runs fully locally on Ollama with DeepSeek Coder, with no external API dependency.",
@@ -161,10 +164,11 @@ var SITE = {                                                  // var so Node's v
     },
     {
       id:       "yt-spotify",
+      launch:   "2026-03",               // YYYY-MM; drives the row date
+      result:   "85%+ song match accuracy",
       title:    "YT-Spotify Playlist Converter",
       summary:  "Paste a playlist URL, sign in, and it's recreated on the other service in under 30 seconds.",
       dates:    "Mar 2026",
-      featured: true,
       bullets: [
         "Dual OAuth via NextAuth.js keeps Spotify and Google tokens live at the same time without session conflicts.",
         "Fuzzy title matching reaches 85%+ song match accuracy across varied playlists."
@@ -178,10 +182,11 @@ var SITE = {                                                  // var so Node's v
     },
     {
       id:       "algo-playground",
+      launch:   "2025-08",               // YYYY-MM; drives the row date
+      result:   "3 sorts, 4 pathfinding algorithms",
       title:    "Algorithm Visual Playground",
       summary:  "Watch sorting and pathfinding algorithms run step by step.",
       dates:    "Aug 2025",
-      featured: true,
       bullets: [
         "Sorting visualizer: Bubble, Merge and Quick Sort.",
         "Pathfinding playground with walls: BFS, DFS, A* and Dijkstra.",
@@ -193,6 +198,8 @@ var SITE = {                                                  // var so Node's v
     },
     {
       id:       "admin-crm",
+      launch:   null,                       // TODO: launch month unknown
+      result:   "Self-hosted, no external APIs",
       title:    "Admin/CRM Tracking Tool",
       summary:  "Locally hosted admin tracking and CRM tool built for internal MSP use.",
       dates:    null,                                       // TODO: add dates
@@ -207,6 +214,8 @@ var SITE = {                                                  // var so Node's v
     },
     {
       id:       "cultural-archive",
+      launch:   null,                       // TODO: launch month unknown
+      result:   "Archive, records site and intranet",
       title:    "Cultural Archive & Intranet Infrastructure",
       summary:  "Archive sites and an internal intranet, deployed and maintained for a client.",
       dates:    null,                                       // TODO: add dates
@@ -220,6 +229,9 @@ var SITE = {                                                  // var so Node's v
     },
     {
       id:       "gitabot",
+      minor:    true,                                     // side mission: smaller row under the main log
+      launch:   "2024-12",               // YYYY-MM; drives the row date
+      result:   "700+ Q&A pairs, 50+ beta users",
       title:    "Gitabot",
       summary:  "AI chatbot grounded in the Bhagavad Gita, used by 50+ beta users in a mobile app.",
       dates:    "Dec 2024 – Jan 2025",
@@ -233,6 +245,9 @@ var SITE = {                                                  // var so Node's v
     },
     {
       id:       "infodumper",
+      minor:    true,                                     // side mission: smaller row under the main log
+      launch:   "2025-03",               // YYYY-MM; drives the row date
+      result:   "30,000+ organic views",
       title:    "Infodumper",
       summary:  "Experimental AI-generated YouTube channel that passed 30,000 organic views in a few weeks.",
       dates:    "Mar – Apr 2025",
