@@ -431,11 +431,12 @@ main, .site-footer { z-index: 1; }
 @media (min-width: 1100px) {
   .scene-scrim {
     /* Desktop: a veil behind the text column that clears for the right third, where the planet sits */
+    /* stays strong across the whole text column (it ends ~65% of the width at 1440) before clearing for the planet */
     background: linear-gradient(90deg,
       color-mix(in srgb, var(--bg) 90%, transparent) 0%,
-      color-mix(in srgb, var(--bg) 84%, transparent) 48%,
-      color-mix(in srgb, var(--bg) 40%, transparent) 62%,
-      color-mix(in srgb, var(--bg) 0%, transparent) 74%);
+      color-mix(in srgb, var(--bg) 86%, transparent) 60%,
+      color-mix(in srgb, var(--bg) 55%, transparent) 68%,
+      color-mix(in srgb, var(--bg) 0%, transparent) 78%);
   }
 }
 

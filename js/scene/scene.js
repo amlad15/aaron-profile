@@ -141,7 +141,7 @@ export async function start({ canvas, isChart }) {
         const mr = b.radius * (0.1 + (i % 3) * 0.025) * (b.rings ? 0.9 : 1.4);
         const mm = planetMaterial(6, ['#8F8A80', '#54514B', '#BDB8AE', '#000000'], b.seed + i * 1.7, lite ? 0 : 0.06, Math.max(2, OCT - 2), U);
         const mesh = new THREE.Mesh(new THREE.SphereGeometry(mr, lite ? 16 : 28, lite ? 10 : 18), mm);
-        moons.push({ mesh, mat: mm, orbit: b.radius * ((b.rings ? 2.75 : 2.0) + i * 0.42), speed: 0.045 / (1 + i * 0.25),
+        moons.push({ mesh, mat: mm, orbit: b.radius * ((b.rings ? 2.5 : 1.7) + i * (b.rings ? 0.2 : 0.3)), speed: 0.045 / (1 + i * 0.25),   // tight orbits: moons must not wander under the text
           phase: i * 2.399, incline: (i % 2 ? 1 : -1) * (0.08 + i * 0.03), glow: 0, glowTarget: 0 });
         group.add(mesh);
       }
@@ -251,7 +251,7 @@ export async function start({ canvas, isChart }) {
     tmp.off.copy(tmp.dir).multiplyScalar(-0.5).addScaledVector(tmp.tan, 0.82).addScaledVector(UP, 0.24).normalize();   // sun-side three-quarter view: lit face plus a terminator
     const d = b.radius * (b.dist || 7.6) * (wide() ? 1 : 1.5);
     const cam = p.clone().addScaledVector(tmp.off, d);
-    frame(p, cam, wide() ? 0.62 : 0, outPos, outTgt);
+    frame(p, cam, wide() ? 0.66 : 0, outPos, outTgt);       // planet centre sits ~83% across: clear of the text column
   }
   function heroKey(outPos, outTgt) {
     const a = 0.9 + time * 0.012;                             // slow establishing orbit
@@ -397,7 +397,6 @@ export async function start({ canvas, isChart }) {
   draw();
   adaptQuality();
   canvas.classList.add('is-ready');                          // CSS fades the canvas in over the static starfield
-  if (location.search.includes('scenedebug')) window.__scene = { scene, renderer, composer, bodies, nebula, corona, starMats, draw, setComposer: c => { composer = c; } };   // TEMP: perf bisection
   poke();
   return { bodies };
 }
