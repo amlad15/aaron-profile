@@ -255,8 +255,8 @@ export async function start({ canvas, isChart }) {
   }
   function heroKey(outPos, outTgt) {
     const a = 0.9 + time * 0.012;                             // slow establishing orbit
-    const r = wide() ? 330 : 420;
-    frame(new THREE.Vector3(), new THREE.Vector3(Math.cos(a) * r, 150, Math.sin(a) * r), wide() ? 0.3 : 0, outPos, outTgt);
+    const r = wide() ? 250 : 380;                             // close enough that the inner planets read, wide enough to show the system
+    frame(new THREE.Vector3(), new THREE.Vector3(Math.cos(a) * r, 105, Math.sin(a) * r), wide() ? 0.32 : 0, outPos, outTgt);
   }
   function finalKey(b, outPos, outTgt) {
     const p = b.group.position;
@@ -392,7 +392,8 @@ export async function start({ canvas, isChart }) {
   k = scrollToK(scrollY);                                    // deep links / mid-page reloads: no fly-in
   if (reduced) k = Math.round(k);
   updateWorld(0); updateAccent(k, 0); place(k);
-  if (renderer.compileAsync) await renderer.compileAsync(scene, camera);
+  if (renderer.extensions.has('KHR_parallel_shader_compile')) await renderer.compileAsync(scene, camera);   // compile off the main thread where the GPU allows
+  else renderer.compile(scene, camera);                     // otherwise compile once now (compileAsync would only warn)
   draw();
   adaptQuality();
   canvas.classList.add('is-ready');                          // CSS fades the canvas in over the static starfield
