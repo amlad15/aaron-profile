@@ -68,7 +68,7 @@ var SiteRender = (function () {
     <p class="eyebrow">${esc(p.location)}</p>
     <h1 id="hero-title">${esc(p.name)}</h1>
     <p class="pitch">${esc(p.pitch)}</p>
-    <p class="status"><span class="status-dot" aria-hidden="true"></span>${esc(p.status)}</p>
+    ${p.status ? `<p class="status"><span class="status-dot" aria-hidden="true"></span>${esc(p.status)}</p>` : ''}
     <div class="actions">
       <a class="btn btn--primary" href="${esc(p.resume)}">${icon('file')}Resume <span class="sr-note">(PDF)</span></a>
       <a class="btn" href="${esc(p.github)}">${icon('github')}GitHub</a>
@@ -141,8 +141,8 @@ var SiteRender = (function () {
       ${figure(pr.image, pr.title)}
       <div class="project-body">
         <h3>${esc(pr.title)} <a class="permalink" href="#projects/${esc(pr.id)}" aria-label="Link to ${esc(pr.title)}">${icon('link')}</a></h3>
-        <p class="meta">${esc(pr.dates)}</p>
-        <p>${esc(pr.summary)}</p>
+        ${pr.dates ? `<p class="meta">${esc(pr.dates)}</p>` : ''}
+        <p class="project-summary">${esc(pr.summary)}</p>
         ${bullets(pr.bullets)}
         ${tags(pr.tags)}
         ${links.length ? `<div class="actions">${links.join('')}</div>` : ''}

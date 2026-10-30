@@ -11,30 +11,30 @@
  *   "TODO: …"  = comment for you; never rendered
  *
  * OPEN TODOs
- *   1. profile.pitch: confirm the hero one-liner wording
- *   2. profile.resume: AaronCV.pdf is from Mar 2026, before GuidePost and Aerocool
- *   3. education[0].end: graduation date ("Expected May 2026" was outdated)
- *   4. projects yt-spotify: repo is private/404 (repoPublic: false hides the button)
- *   5. projects yt-spotify: live demo is behind Vercel login (liveReady: false hides it)
- *   6. projects gitabot: github.com/amlad15/gita_bot is private/404 (repoPublic: false)
- *   7. projects *: add screenshots to assets/projects/ and set `image`
- *   8. certificates: all 9 PDFs are placeholders, so they stay hidden until replaced
+ *   1. profile.resume: AaronCV.pdf is from Mar 2026, before GuidePost and Aerocool
+ *   2. projects yt-spotify: repo is private/404 (repoPublic: false hides the button)
+ *   3. projects yt-spotify: live demo is behind Vercel login (liveReady: false hides it)
+ *   4. projects gitabot: github.com/amlad15/gita_bot is private/404 (repoPublic: false)
+ *   5. projects admin-crm, cultural-archive: dates unknown (null hides them)
+ *   6. projects *: add screenshots to assets/projects/ and set `image`
+ *   7. certificates: all 9 PDFs are placeholders, so they stay hidden until replaced
+ *
+ * Privacy: never name GuidePost's clients anywhere (text, alt text, filenames, meta).
  */
 
 var SITE = {                                                  // var so Node's vm context sees it as a global
 
   profile: {
     name:     "Aaron Lad",
-    // TODO: confirm wording (drafted from existing facts only)
-    pitch:    "Computing Science at the University of Alberta. I build full-stack web apps, AI tools, and websites for local businesses.",
-    status:   "Open to new-grad roles and freelance web projects",
+    pitch:    "Full-stack developer with hands-on IT and sysadmin experience, open to new-grad roles and freelance web projects.",
+    status:   null,                                         // pitch already says it; set a string to show the pill again
     location: "Edmonton, Alberta, Canada",
     email:    "ladaaron15@gmail.com",
     phone:    "(825) 343-2012",
     phoneE164: "+18253432012",                                // tel: links need the bare international form
     github:   "https://github.com/amlad15",
-    linkedin: "https://www.linkedin.com/in/aaron-lad",
-    resume:   "assets/AaronCV.pdf"                            // TODO: re-export; current PDF predates Apr 2026
+    linkedin: "https://www.linkedin.com/in/aaron-lad-80070625b",
+    resume:   "assets/AaronCV.pdf"                            // TODO: replace; current PDF predates Apr 2026
   },
 
   /* Newest first. bullets render as a list; keep each one a single line of fact. */
@@ -62,13 +62,16 @@ var SITE = {                                                  // var so Node's v
       orgNote:  "Managed IT services provider",
       location: "Edmonton, AB",
       dates:    "Apr 2026 – Aug 2026",
-      bullets: [
-        "Microsoft 365 provisioning and access management for client organizations.",
-        "Automated admin work with PowerShell and Microsoft Graph across client tenants.",
-        "Set up and deployed client hardware.",
-        "Wrote SEO content, ran Google Ads and LinkedIn, and handled client communications."
+      bullets: [                                            // client names deliberately omitted
+        "Provisioned and managed Microsoft 365 accounts, licensing and access across multiple client tenants.",
+        "Deployed and configured hardware for client environments, including laptop imaging and asset setup.",
+        "Resolved MSP support tickets spanning Intune compliance, firewall SSL inspection errors, Windows configuration issues and VM provisioning.",
+        "Configured an internal Certificate Authority (AD CS) for HTTPS on internal domains; performed Wi-Fi site surveys and network troubleshooting with Wireshark.",
+        "Wrote PowerShell automation for Azure AD/AD administration, including one-click device provisioning (domain disjoin, RMM agent install, user creation, restart).",
+        "Managed IAM access and Proofpoint email security configuration across client accounts.",
+        "Supported marketing operations: SEO content, Google Ads and client communications."
       ],
-      tags: ["Microsoft 365", "PowerShell", "Microsoft Graph", "Hardware", "SEO", "Google Ads"]
+      tags: ["Microsoft 365", "Intune", "PowerShell", "Azure AD", "AD CS", "Proofpoint", "Wireshark", "IAM"]
     },
     {
       id:       "unconventional",
@@ -189,6 +192,33 @@ var SITE = {                                                  // var so Node's v
       image: null                                           // TODO: screenshot
     },
     {
+      id:       "admin-crm",
+      title:    "Admin/CRM Tracking Tool",
+      summary:  "Locally hosted admin tracking and CRM tool built for internal MSP use.",
+      dates:    null,                                       // TODO: add dates
+      bullets: [
+        "Customer flowcharts, task tracking, asset and server inventories, and due-date reminders.",
+        "Unified command system (natural language plus slash commands with autocomplete) to add, update and query records, with the UI jumping to the affected record.",
+        "Structured asset naming and bulk range logic integrated with RMM tool exports.",
+        "Fully self-hosted for data security, with no external API dependencies."
+      ],                                                    // not AI-powered: keep it out of the copy
+      tags:  ["Node.js", "Express", "PostgreSQL", "Docker"],
+      image: null                                           // no public repo, so no GitHub button
+    },
+    {
+      id:       "cultural-archive",
+      title:    "Cultural Archive & Intranet Infrastructure",
+      summary:  "Archive sites and an internal intranet, deployed and maintained for a client.",
+      dates:    null,                                       // TODO: add dates
+      bullets: [
+        "Mukurtu CMS for a client's cultural archive site: taxonomy configuration and custom theming.",
+        "AtoM archival records site on an Ubuntu VPS.",
+        "Internal Hyper-V-hosted intranet behind an IIS reverse proxy with SSL."
+      ],
+      tags:  ["Mukurtu", "AtoM", "Drupal", "Hyper-V", "IIS"],
+      image: null                                           // no links: client is never named
+    },
+    {
       id:       "gitabot",
       title:    "Gitabot",
       summary:  "AI chatbot grounded in the Bhagavad Gita, used by 50+ beta users in a mobile app.",
@@ -218,7 +248,7 @@ var SITE = {                                                  // var so Node's v
 
   skills: [
     { title: "Languages",              note: "Primary: Python & TypeScript",
-      items: ["Python", "TypeScript", "JavaScript", "SQL", "HTML", "CSS", "Bash", "PowerShell", "YAML"] },
+      items: ["Python", "TypeScript", "JavaScript", "SQL", "HTML", "CSS", "Bash", "YAML"] },
     { title: "Frameworks & Libraries", note: "Full-stack web & real-time apps",
       items: ["React", "Next.js 14", "Node.js", "Express", "Socket.IO", "Leaflet.js", "TailwindCSS", "NextAuth.js", "Streamlit"] },
     { title: "AI & Machine Learning",  note: "Local LLM workflows & agent systems",
@@ -227,8 +257,10 @@ var SITE = {                                                  // var so Node's v
       items: ["PostgreSQL", "PostGIS", "pgvector", "MongoDB", "REST APIs", "WebSockets", "Data Engineering", "Power BI", "Data Visualization"] },
     { title: "DevOps & Cloud",         note: "Containers & deployment",
       items: ["Docker", "Kubernetes", "GitHub Actions", "CI/CD", "AWS", "Vercel", "Linux", "Git"] },
-    { title: "IT & Marketing",         note: "From sysadmin and client work",
-      items: ["Microsoft 365", "Microsoft Graph", "WordPress", "Elementor", "Google Ads", "Google Business Profile", "Meta Ads", "SEO"] }
+    { title: "IT & Systems",           note: "From MSP sysadmin work",
+      items: ["Microsoft 365 / Intune", "Active Directory / Azure AD", "AD CS (internal PKI)", "IAM", "Proofpoint", "PowerShell", "Microsoft Graph", "Wireshark", "VLANs / DHCP / firewall fundamentals", "Wi-Fi site surveys (NetSpot)"] },
+    { title: "Web & Marketing",        note: "From freelance and client work",
+      items: ["WordPress / Elementor", "Google Ads", "Google Business Profile", "Meta Ads", "SEO"] }
   ],
 
   education: [
@@ -239,7 +271,7 @@ var SITE = {                                                  // var so Node's v
       school:  "University of Alberta",
       location: "Edmonton, AB",
       start:   "2022",
-      end:     null,                                        // TODO: graduation date ("Expected May 2026" was outdated)
+      end:     "Expected Dec 2026",
       awards: [
         "Regional Excellence Scholarship: $5,000 CAD (2023)",
         "International Admission Scholarship: $5,000 CAD (2022)"

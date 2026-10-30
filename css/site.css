@@ -256,7 +256,8 @@ section[id], article[id], li[id], h3[id] { scroll-margin-top: calc(var(--header-
 .project .shot { border-bottom: 1px solid var(--border); }
 .project-body { padding: 22px 24px 24px; display: flex; flex-direction: column; flex: 1; }
 .project h3 { font-size: 1.25rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.project .meta { margin: 6px 0 12px; }
+.project .meta { margin: 6px 0 0; }
+.project-summary { margin-top: 12px; }   /* spacing lives here so cards without dates line up too */
 .project .actions { margin-top: auto; padding-top: 18px; }
 .permalink {
   flex: none; display: inline-grid; place-items: center; width: 44px; height: 44px; margin: -10px -12px 0 0;
