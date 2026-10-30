@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://amlad15.github.io/aaron-profile/sitemap.xml
