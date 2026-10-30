@@ -55,39 +55,29 @@ float fbm(vec3 p) {
 }
 `;
 
-// Shared vertex shader: world-space normal/position for lighting, object-space point for noise (rotates with the planet)
+// Shared vertex shader: world-space normal/position for lighting, object-space point for noise (rotates with the planet),
+// plus the object axes in world space so object-space bump normals can be brought back to world space
 export const BODY_VS = /* glsl */`
 varying vec3 vObj;
 varying vec3 vNormalW;
 varying vec3 vPosW;
+varying vec3 vAx;
+varying vec3 vAy;
+varying vec3 vAz;
 void main() {
   vObj = normalize(position);
   vec4 w = modelMatrix * vec4(position, 1.0);
   vPosW = w.xyz;
-  vNormalW = normalize(mat3(modelMatrix) * normal);   // uniform scale only, so no normal matrix needed
+  mat3 m = mat3(modelMatrix);                         // uniform scale only, so no normal matrix needed
+  vNormalW = normalize(m * normal);
+  vAx = normalize(m[0]); vAy = normalize(m[1]); vAz = normalize(m[2]);
   gl_Position = projectionMatrix * viewMatrix * w;
 }
 `;
 
-const CHART = /* glsl */`
-// Light theme: ink-on-paper star chart instead of an inverted dark render
-float gridLine(float x) { float w = fwidth(x); return 1.0 - smoothstep(0.0, 1.5 * w, abs(fract(x - 0.5) - 0.5)); }
-vec3 chartShade(vec3 col, vec3 N0, vec3 V, float ndl) {
-  float lum = dot(col, vec3(0.3, 0.59, 0.11));
-  vec3 c = uPaper * (1.0 - (1.0 - smoothstep(-0.1, 0.5, ndl)) * 0.16);    // paper greys a little away from the sun
-  c = mix(c, uInk, (1.0 - lum) * 0.10);                                    // surface pattern survives as faint ink wash
-  float hatch = step(0.72, fract((gl_FragCoord.x - gl_FragCoord.y) / 4.5)) * smoothstep(0.25, -0.35, ndl);
-  c = mix(c, uInk, hatch * 0.32);                                          // night side drawn with diagonal hatching
-  float lat = asin(clamp(vObj.y, -1.0, 1.0)) * 3.8197;                     // 6 bands per hemisphere
-  float lon = atan(vObj.z, vObj.x) * 1.9099;                               // 12 meridians
-  c = mix(c, uInk, max(gridLine(lat), gridLine(lon)) * 0.14);
-  float edge = smoothstep(0.78, 0.94, 1.0 - max(dot(N0, V), 0.0));
-  c = mix(c, mix(uInk, uAccentCol, uAccent), edge * 0.92);                 // ink outline, orange only for the active section
-  return c;
-}
-`;
-
-// One planet shader; STYLE picks the surface. Bump comes from screen-space derivatives of the height (cheap, no extra noise taps).
+// One planet shader; STYLE picks the surface.
+// relief() is a deliberately smooth, low-frequency height: it drives both the bump (object-space finite
+// differences, so no 2x2-quad derivative speckle) and the contour lines of the light-theme chart.
 export const PLANET_FS = /* glsl */`
 uniform vec3 uSun;
 uniform float uTime, uSeed, uBump, uChart, uAccent, uGlow, uPulse;
@@ -95,31 +85,55 @@ uniform vec3 uC0, uC1, uC2, uC3, uPaper, uInk, uAccentCol;
 varying vec3 vObj;
 varying vec3 vNormalW;
 varying vec3 vPosW;
+varying vec3 vAx;
+varying vec3 vAy;
+varying vec3 vAz;
 ${NOISE}
-${CHART}
-vec3 bumpNormal(vec3 n, vec3 pos, float h, float k) {
-  vec3 dpx = dFdx(pos), dpy = dFdy(pos);
-  float dhx = dFdx(h), dhy = dFdy(h);
-  vec3 r1 = cross(dpy, n), r2 = cross(n, dpx);
-  float det = dot(dpx, r1);
-  vec3 grad = sign(det) * (dhx * r1 + dhy * r2);
-  return normalize(abs(det) * n - k * grad);
+float crater(float c, float a, float b) { return smoothstep(a, b, c) - smoothstep(b, b + 0.32, c) * 1.25; }   // raised rim, sunken bowl; walls kept gentle so they shade, not outline
+float relief(vec3 p) {
+#if STYLE == 0
+  return snoise(p * 2.2 + uSeed) * 0.45 + snoise(p * 4.6 + uSeed) * 0.18 + crater(snoise(p * 2.8 + uSeed * 1.7), 0.5, 0.68) * 0.35 + crater(snoise(p * 7.5 + uSeed), 0.62, 0.78) * 0.1;   // few large craters, scattered small ones
+#elif STYLE == 2
+  return snoise(p * 1.8 + uSeed) * 0.3 - (1.0 - smoothstep(0.0, 0.2, abs(snoise(p * 3.2 + uSeed * 2.0)))) * 0.05;   // barely-there grooves: the cracks are mostly colour
+#elif STYLE == 4
+  float n = snoise(p * 1.6 + uSeed);
+  return n * 0.35;                                   // dunes are colour only; as relief they read as melting
+#elif STYLE == 5
+  float n = snoise(p * 1.7 + uSeed);
+  return smoothstep(-0.02, 0.25, n) * (0.08 + n * 0.18);
+#elif STYLE == 6
+  return snoise(p * 2.6 + uSeed) * 0.4 + crater(snoise(p * 3.6 + uSeed), 0.5, 0.68) * 0.3 + crater(snoise(p * 8.0 - uSeed), 0.64, 0.8) * 0.08;
+#else
+  return 0.0;
+#endif
+}
+float gridLine(float x) { float w = fwidth(x); return 1.0 - smoothstep(0.0, 1.5 * w, abs(fract(x - 0.5) - 0.5)); }
+// Light theme: ink-on-paper star chart instead of an inverted dark render
+vec3 chartShade(vec3 N0, vec3 V, float ndl, float field) {
+  vec3 c = uPaper * (1.0 - (1.0 - smoothstep(-0.1, 0.5, ndl)) * 0.14);    // paper greys a little away from the sun
+  c = mix(c, uInk, clamp(0.05 - field * 0.25, 0.0, 0.14));                 // low ground as a light ink wash
+  c = mix(c, uInk, gridLine(field * 5.0 + 0.37) * 0.2);                    // contour lines; the offset keeps flat seas (field 0) off a line
+  float hatch = step(0.72, fract((gl_FragCoord.x - gl_FragCoord.y) / 4.5)) * smoothstep(0.25, -0.35, ndl);
+  c = mix(c, uInk, hatch * 0.3);                                           // night side drawn with diagonal hatching
+  float lat = asin(clamp(vObj.y, -1.0, 1.0)) * 1.9099;                     // 3 bands per hemisphere: a light graticule
+  float lon = atan(vObj.z, vObj.x) * 0.9549;                               // 6 meridians
+  c = mix(c, uInk, max(gridLine(lat), gridLine(lon)) * 0.07);
+  float edge = smoothstep(0.8, 0.95, 1.0 - max(dot(N0, V), 0.0));
+  return mix(c, mix(uInk, uAccentCol, uAccent), edge * 0.92);             // ink outline, orange only for the active section
 }
 void main() {
   vec3 p = vObj;
-  vec3 col; float h = 0.0; float spec = 0.0;
+  float r0 = relief(p);
+  vec3 col; float spec = 0.0; float field = r0;
 #if STYLE == 0
-  // Rocky, cratered (Experience): basalt plains, bright crater rims
+  // Rocky, cratered (Experience): basalt plains, pale crater rims
   float n = fbm(p * 2.2 + uSeed);
-  float cr = snoise(p * 5.5 + uSeed * 1.7);
-  float rim = smoothstep(0.45, 0.62, cr) - smoothstep(0.62, 0.9, cr);
-  float bowl = smoothstep(0.62, 0.9, cr);
+  float cr = crater(snoise(p * 2.8 + uSeed * 1.7), 0.5, 0.68);
   col = mix(uC0, uC1, smoothstep(-0.55, 0.55, n));
-  col = mix(col, uC2, rim * 0.55);
-  col *= 1.0 - bowl * 0.25;
-  h = n * 0.6 + rim * 0.5 - bowl * 0.4;
+  col = mix(col, uC2, clamp(cr, 0.0, 1.0) * 0.3);
+  col *= 1.0 + min(cr, 0.0) * 0.12;
 #elif STYLE == 1
-  // Banded gas giant (Projects): bands warped by slow-drifting noise, one long-lived storm
+  // Banded gas giant (Projects): bands warped by slowly drifting noise, one long-lived storm
   float warp = fbm(vec3(p.x * 1.3, p.y * 5.0, p.z * 1.3) + vec3(uTime * 0.006, 0.0, 0.0) + uSeed);
   float b = p.y * 5.5 + warp * 1.4;
   col = mix(uC0, uC1, 0.5 + 0.5 * sin(b * 3.1416));
@@ -127,28 +141,27 @@ void main() {
   col = mix(col, uC3, smoothstep(0.35, 0.9, fbm(p * vec3(3.0, 14.0, 3.0) + uSeed)) * 0.35);
   float storm = distance(p, normalize(vec3(0.62, -0.32, 0.71)));
   col = mix(col, uC3, smoothstep(0.2, 0.08, storm) * 0.7);
-  h = warp * 0.12;
+  field = sin((p.y * 5.5 + snoise(p * vec3(1.0, 3.0, 1.0) + uSeed) * 0.9) * 1.5708) * 0.6 - smoothstep(0.2, 0.08, storm);   // smoother than the colour bands, so contours stay calm
 #elif STYLE == 2
   // Icy world with soft cracks (Skills)
   float n = fbm(p * 1.8 + uSeed);
-  float c1 = 1.0 - smoothstep(0.0, 0.05, abs(snoise(p * 3.2 + uSeed * 2.0)));
-  float c2 = 1.0 - smoothstep(0.0, 0.035, abs(snoise(p * 7.5 - uSeed)));
+  float c1 = 1.0 - smoothstep(0.0, 0.06, abs(snoise(p * 3.2 + uSeed * 2.0)));
+  float c2 = 1.0 - smoothstep(0.0, 0.04, abs(snoise(p * 7.5 - uSeed)));
   col = mix(uC0, uC1, smoothstep(-0.45, 0.5, n));
-  col = mix(col, uC2, c1 * 0.6 + c2 * 0.3);
-  h = n * 0.3 - c1 * 0.3 - c2 * 0.12;
-  spec = 0.35;
+  col = mix(col, uC2, c1 * 0.5 + c2 * 0.2);
+  spec = 0.12;
 #elif STYLE == 3
-  // Ocean world (Services): open water, slow swirls; clouds live in their own shell
+  // Ocean world (Services): open water and slow swirls; clouds live in their own shell
   float n = fbm(p * 1.5 + uSeed);
   col = mix(uC0, uC1, smoothstep(-0.35, 0.6, n));
   spec = 1.0;
+  field = snoise(p * 1.5 + uSeed) * 0.5;
 #elif STYLE == 4
   // Dune desert (Education)
   float n = fbm(p * 1.6 + uSeed);
-  float dunes = 0.5 + 0.5 * sin((p.x + p.z * 0.7) * 26.0 + n * 9.0);
+  float dunes = 0.5 + 0.5 * sin((p.x + p.z * 0.7) * 24.0 + n * 8.0);
   col = mix(uC0, uC1, smoothstep(-0.45, 0.55, n));
-  col = mix(col, uC2, dunes * 0.16);
-  h = n * 0.35 + dunes * 0.06;
+  col = mix(col, uC2, dunes * 0.14);
 #elif STYLE == 5
   // Terran (About): continents, shallows, ice caps
   float n = fbm(p * 1.7 + uSeed);
@@ -158,29 +171,35 @@ void main() {
   col = mix(sea, ground, land);
   col = mix(col, uC3, smoothstep(0.8, 0.88, abs(p.y) + n * 0.08));
   spec = 1.0 - land;
-  h = land * n * 0.5;
 #else
   // Small cratered moon (Contact, Certificates, the moons)
   float n = fbm(p * 2.6 + uSeed);
-  float cr = snoise(p * 7.0 + uSeed);
-  float rim = smoothstep(0.5, 0.64, cr) - smoothstep(0.64, 0.9, cr);
+  float cr = crater(snoise(p * 3.6 + uSeed), 0.5, 0.68);
   col = mix(uC0, uC1, smoothstep(-0.5, 0.5, n));
-  col = mix(col, uC2, rim * 0.5);
-  h = n * 0.5 + rim * 0.4;
+  col = mix(col, uC2, clamp(cr, 0.0, 1.0) * 0.45);
+  col *= 1.0 + min(cr, 0.0) * 0.12;
 #endif
   vec3 N0 = normalize(vNormalW);
-  vec3 N = uBump > 0.0 ? bumpNormal(N0, vPosW, h, uBump) : N0;
+  vec3 N = N0;
+#if STYLE != 1 && STYLE != 3
+  if (uBump > 0.0) {
+    const float e = 0.003;
+    vec3 g = (vec3(relief(p + vec3(e, 0.0, 0.0)), relief(p + vec3(0.0, e, 0.0)), relief(p + vec3(0.0, 0.0, e))) - r0) / e;
+    vec3 nObj = normalize(p - uBump * (g - dot(g, p) * p));                 // tilt by the tangential part of the slope
+    N = normalize(vAx * nObj.x + vAy * nObj.y + vAz * nObj.z);
+  }
+#endif
   vec3 L = normalize(uSun - vPosW);
   vec3 V = normalize(cameraPosition - vPosW);
+  if (uChart > 0.5) { gl_FragColor = vec4(chartShade(N0, V, dot(N0, L), field), 1.0); return; }
   float ndl = dot(N, L);
-  if (uChart > 0.5) { gl_FragColor = vec4(chartShade(col, N0, V, dot(N0, L)), 1.0); return; }
-  float day = smoothstep(-0.12, 0.6, ndl);                                  // soft terminator, never a hard line
+  float day = smoothstep(-0.12, 0.6, ndl) * smoothstep(-0.25, 0.1, dot(N0, L));   // bumps can't light the night side
   vec3 lit = col * (0.02 + day * 1.08);
-  lit += col * vec3(1.0, 0.55, 0.3) * exp(-pow(ndl * 4.5, 2.0)) * 0.07;    // warm scatter along the terminator
+  lit += col * vec3(1.0, 0.55, 0.3) * exp(-pow(dot(N0, L) * 4.5, 2.0)) * 0.07;    // warm scatter along the terminator
   vec3 H = normalize(L + V);
   lit += spec * pow(max(dot(N, H), 0.0), 70.0) * 0.45 * day;
-  lit += col * uGlow * 0.55;                                                // moons brighten when their project is open
-  lit += uAccentCol * uPulse * 0.55;                                        // current-role moon breathes in the accent
+  lit += col * uGlow * 0.55;                                                       // moons brighten when their project is open
+  lit += uAccentCol * uPulse * 0.55;                                               // current-role moon breathes in the accent
   gl_FragColor = vec4(lit, 1.0);
 }
 `;
@@ -212,15 +231,11 @@ varying vec3 vPosW;
 void main() {
   vec3 N = normalize(vNormalW);
   vec3 V = normalize(cameraPosition - vPosW);
-  float f = pow(1.0 - max(dot(N, V), 0.0), 2.4);
-  if (uChart > 0.5) {
-    float a = smoothstep(0.55, 0.95, f) * uAccent * 0.6;
-    gl_FragColor = vec4(uAccentCol, a);
-    return;
-  }
+  float f = pow(1.0 - max(dot(N, V), 0.0), 3.2);
+  if (uChart > 0.5) discard;                                                // on paper the ink outline carries the accent
   float day = smoothstep(-0.35, 0.45, dot(N, normalize(uSun - vPosW)));
-  vec3 c = mix(uAtmo, uAccentCol, uAccent);
-  float a = f * (0.08 + day) * uStrength * (1.0 + uAccent * 0.5);
+  vec3 c = mix(uAtmo, uAccentCol, uAccent * 0.7);                           // a warm tint, not a neon ring
+  float a = f * (0.08 + day) * uStrength * (1.0 + uAccent * 0.2);
   gl_FragColor = vec4(c * a, a);
 }
 `;

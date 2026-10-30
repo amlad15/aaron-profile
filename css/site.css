@@ -50,13 +50,17 @@
 
 /* ── Base ─────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--header-h) + 16px); }
+html {
+  -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--header-h) + 16px);
+  background-color: var(--bg);                               /* the page colour lives here so the scene can sit between it and the content */
+  transition: background-color .3s var(--ease);
+}
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 body {
-  margin: 0; background: var(--bg); color: var(--text);
+  margin: 0; background: transparent; color: var(--text);   /* transparent: the fixed scene shows through */
   font: 400 1.0625rem/1.65 var(--font-body);                 /* 17px body */
   overflow-x: clip;                                          /* belt-and-braces against stray horizontal scroll */
-  transition: background-color .3s var(--ease), color .3s var(--ease);   /* theme switch eases instead of flashing */
+  transition: color .3s var(--ease);                         /* theme switch eases instead of flashing */
 }
 h1, h2, h3, h4, p { margin: 0; }
 h1, h2 { font-family: var(--font-display); font-weight: 800; text-transform: uppercase; line-height: .9; letter-spacing: .005em; }
@@ -221,9 +225,14 @@ main:focus { outline: none; }                                /* only reached via
 .sec-head { display: grid; gap: 14px; align-content: start; }
 .sec-head h2 { font-size: clamp(2.75rem, 4vw + 1.25rem, 4.5rem); }
 .dek { color: var(--muted); max-width: 32ch; }
-@media (min-width: 960px) {
+@media (min-width: 960px) and (max-width: 1099px) {
   .sec-head { grid-column: 1 / span 4; position: sticky; top: calc(var(--header-h) + 40px); }   /* label stays beside long sections */
   .sec-body { grid-column: 5 / -1; }
+}
+@media (min-width: 1100px) {
+  .sec-head, .sec-body { grid-column: 1 / span 8; }           /* text keeps the left two-thirds; the section's planet owns the right third */
+  .section { border-bottom: 0; background: linear-gradient(90deg, var(--rule) 0 52%, transparent 70%) left bottom / 100% 1px no-repeat; }   /* section rules fade out before the planet */
+  .hero { border-bottom: 0; }
 }
 .subhead { font-size: .8125rem; font-family: var(--font-mono); font-weight: 500; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); margin: 56px 0 8px; }
 .small-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-top: 16px; }
@@ -384,6 +393,50 @@ main:focus { outline: none; }                                /* only reached via
     transition-delay: calc(var(--i, 0) * 70ms);              /* --i set per sibling for the stagger */
   }
   .reveal-ready [data-reveal].is-in { opacity: 1; transform: none; }
+}
+
+/* ── Background scene layering ────────────────────────────────────────
+   html colour → (static starfield fallback) → WebGL canvas → reduced-motion fade layer → scrim → content.
+   The fallback is what JS-off / no-WebGL2 visitors see; the canvas covers it once ready. */
+html {
+  background-image:
+    radial-gradient(1px 1px at 7% 12%, rgba(var(--star), .55) 50%, transparent 52%),
+    radial-gradient(1px 1px at 23% 64%, rgba(var(--star), .35) 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 38% 28%, rgba(var(--star), .5) 50%, transparent 52%),
+    radial-gradient(1px 1px at 52% 84%, rgba(var(--star), .3) 50%, transparent 52%),
+    radial-gradient(1px 1px at 67% 41%, rgba(var(--star), .45) 50%, transparent 52%),
+    radial-gradient(1.5px 1.5px at 81% 9%, rgba(var(--star), .5) 50%, transparent 52%),
+    radial-gradient(1px 1px at 91% 72%, rgba(var(--star), .35) 50%, transparent 52%),
+    radial-gradient(60vmax 50vmax at 85% 30%, rgba(var(--wash), .07), transparent 70%);
+  background-size: 360px 360px, 360px 360px, 360px 360px, 360px 360px, 360px 360px, 360px 360px, 360px 360px, 100% 100%;
+  background-attachment: fixed;
+}
+:root { --wash: 255, 106, 43; }
+:root[data-theme="light"] { --wash: 180, 56, 10; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --wash: 180, 56, 10; } }
+body, .site-header, main, .site-footer, .skip-link { position: relative; }
+.site-header { z-index: 50; }
+main, .site-footer { z-index: 1; }
+.scene, .scene-fade, .scene-scrim { position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100lvh; pointer-events: none; }   /* lvh: no resize churn as mobile toolbars slide */
+.scene, .scene-fade { z-index: 0; display: block; }
+.scene { opacity: 0; transition: opacity 1.2s var(--ease); }
+.scene.is-ready { opacity: var(--scene-opacity, 1); }
+.scene-fade { opacity: 0; }
+.scene-scrim {
+  z-index: 0;
+  /* Under 1100px the planet sits behind the text, so the whole frame is veiled */
+  background: color-mix(in srgb, var(--bg) 74%, transparent);
+}
+@media (max-width: 1099px) { :root { --scene-opacity: .75; } }    /* smaller, softer planet behind content */
+@media (min-width: 1100px) {
+  .scene-scrim {
+    /* Desktop: a veil behind the text column that clears for the right third, where the planet sits */
+    background: linear-gradient(90deg,
+      color-mix(in srgb, var(--bg) 90%, transparent) 0%,
+      color-mix(in srgb, var(--bg) 84%, transparent) 48%,
+      color-mix(in srgb, var(--bg) 40%, transparent) 62%,
+      color-mix(in srgb, var(--bg) 0%, transparent) 74%);
+  }
 }
 
 

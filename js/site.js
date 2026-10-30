@@ -144,5 +144,19 @@
       return verified;
     });
 
+  /* ── Background scene: built after first paint so it can never delay content ── */
+  (function bootScene() {
+    const canvas = $('.scene');
+    if (!canvas) return;
+    let gl2 = false;
+    try { gl2 = !!document.createElement('canvas').getContext('webgl2'); } catch (_) {}
+    if (!gl2) return;                                        // current three.js needs WebGL2; the CSS starfield stays
+    const go = () => import('./scene/scene.js')
+      .then(m => m.start({ canvas, isChart: () => currentTheme() === 'light' }))
+      .catch(err => console.warn('[scene] not started:', err && err.message));   // the page is complete without it
+    const later = () => (window.requestIdleCallback ? requestIdleCallback(go, { timeout: 3000 }) : setTimeout(go, 1500));
+    if (document.readyState === 'complete') later(); else addEventListener('load', later, { once: true });
+  }());
+
   if (location.hash) followHash();
 }());

@@ -15,18 +15,18 @@ const C = hex => new THREE.Color(hex);
 const UP = new THREE.Vector3(0, 1, 0);
 
 // Section → body. Styles: 0 rocky, 1 gas giant, 2 ice, 3 ocean, 4 desert, 5 terran, 6 small cratered moon
-const BODIES = [
+export const BODIES = [
   { section: 'experience',   style: 0, orbit: 46,  angle: 0.35, radius: 3.4, seed: 1.3, colors: ['#3E3832', '#857A6C', '#CEC4B4', '#000000'], atmo: '#C9A98A', moons: '#experience .tl-item', pulseFirst: true },
   { section: 'services',     style: 3, orbit: 66,  angle: 1.2,  radius: 3.8, seed: 4.1, colors: ['#172329', '#30505C', '#000000', '#000000'], atmo: '#8FB6C6', clouds: 0.85 },
-  { section: 'projects',     style: 1, orbit: 94,  angle: 2.05, radius: 8.0, seed: 2.7, colors: ['#D9CCB3', '#8A795F', '#B8A07C', '#5B4B39'], atmo: '#D9C7A6', rings: true, moons: '#projects .mission', dist: 9.5 },
-  { section: 'skills',       style: 2, orbit: 120, angle: 2.9,  radius: 3.6, seed: 7.7, colors: ['#E2E7EA', '#9FB2BC', '#556A75', '#000000'], atmo: '#C3DCE8' },
+  { section: 'projects',     style: 1, orbit: 94,  angle: 2.05, radius: 8.0, seed: 2.7, colors: ['#D9CCB3', '#8A795F', '#B8A07C', '#5B4B39'], atmo: '#D9C7A6', rings: true, moons: '#projects .mission', dist: 11 },
+  { section: 'skills',       style: 2, orbit: 120, angle: 2.9,  radius: 3.6, seed: 7.7, colors: ['#BCC6CC', '#8C9DA6', '#6A7E89', '#000000'], atmo: '#B5CCD8' },   // kept below the bloom threshold
   { section: 'education',    style: 4, orbit: 142, angle: 3.7,  radius: 3.1, seed: 5.5, colors: ['#C4AC87', '#7B674D', '#E6D5B7', '#000000'], atmo: '#E2CBA5' },
   { section: 'certificates', style: 6, orbit: 158, angle: 4.35, radius: 2.0, seed: 9.2, colors: ['#8E8A82', '#56534D', '#BAB5AB', '#000000'], atmo: '#BDB7AC' },
   { section: 'about',        style: 5, orbit: 176, angle: 5.0,  radius: 4.1, seed: 3.3, colors: ['#1A2930', '#6B6550', '#9C9173', '#ECE9E1'], atmo: '#9CC2D2', clouds: 0.7 },
   { section: 'contact',      style: 6, orbit: 204, angle: 5.75, radius: 2.9, seed: 6.6, colors: ['#9C978D', '#5C5852', '#CCC6B9', '#000000'], atmo: '#C9C3B6', satellite: true }
 ];
 
-const THEME = {
+export const THEME = {
   dark:  { bg: '#0B0C0E', ink: '#17181B', paper: '#F3F0E8', accent: '#FF6A2B', star: '#ECE8DF', orbit: ['#ECE8DF', 0.07] },
   chart: { bg: '#F3F0E8', ink: '#2A2B2F', paper: '#F3F0E8', accent: '#B4380A', star: '#2A2B2F', orbit: ['#2A2B2F', 0.2] }
 };
@@ -110,11 +110,11 @@ export async function start({ canvas, isChart }) {
     const spin = new THREE.Group();                          // surface spins; atmosphere and rings don't need to
     spin.rotation.z = 0.18 + b.seed * 0.03;                  // a little axial tilt each
     group.add(spin);
-    const mat = planetMaterial(b.style, b.colors, b.seed, b.style === 1 ? 0 : 0.9, OCT, U);
+    const mat = planetMaterial(b.style, b.colors, b.seed, lite ? 0 : 0.08, OCT, U);   // bump costs 3 extra relief taps; phones skip it
     spin.add(new THREE.Mesh(new THREE.SphereGeometry(b.radius, SEG, SEG / 2), mat));
     const atmo = new THREE.Mesh(new THREE.SphereGeometry(b.radius * 1.06, SEG / 2, SEG / 4),
       new THREE.ShaderMaterial({ vertexShader: BODY_VS, fragmentShader: ATMO_FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-        uniforms: { ...U, uAtmo: { value: C(b.atmo) }, uAccent: { value: 0 }, uStrength: { value: 0.95 } } }));
+        uniforms: { ...U, uAtmo: { value: C(b.atmo) }, uAccent: { value: 0 }, uStrength: { value: 0.8 } } }));
     group.add(atmo);
     let clouds = null;
     if (b.clouds) {
@@ -139,7 +139,7 @@ export async function start({ canvas, isChart }) {
       const n = document.querySelectorAll(b.moons).length;   // one moon per project row / role
       for (let i = 0; i < n; i++) {
         const mr = b.radius * (0.1 + (i % 3) * 0.025) * (b.rings ? 0.9 : 1.4);
-        const mm = planetMaterial(6, ['#8F8A80', '#54514B', '#BDB8AE', '#000000'], b.seed + i * 1.7, 0.6, Math.max(2, OCT - 2), U);
+        const mm = planetMaterial(6, ['#8F8A80', '#54514B', '#BDB8AE', '#000000'], b.seed + i * 1.7, lite ? 0 : 0.06, Math.max(2, OCT - 2), U);
         const mesh = new THREE.Mesh(new THREE.SphereGeometry(mr, lite ? 16 : 28, lite ? 10 : 18), mm);
         moons.push({ mesh, mat: mm, orbit: b.radius * ((b.rings ? 2.75 : 2.0) + i * 0.42), speed: 0.045 / (1 + i * 0.25),
           phase: i * 2.399, incline: (i % 2 ? 1 : -1) * (0.08 + i * 0.03), glow: 0, glowTarget: 0 });
@@ -177,7 +177,9 @@ export async function start({ canvas, isChart }) {
         import('three/addons/postprocessing/UnrealBloomPass.js'), import('three/addons/postprocessing/OutputPass.js')]);
       composer = new EffectComposer(renderer);
       composer.addPass(new RenderPass(scene, camera));
-      bloomPass = new UnrealBloomPass(new THREE.Vector2(...size()), 0.32, 0.55, 0.82);
+      bloomPass = new UnrealBloomPass(new THREE.Vector2(...size()), 0.32, 0.55, 0.9);   // threshold high: only the sun and its corona glow
+      const fullSize = bloomPass.setSize.bind(bloomPass);
+      bloomPass.setSize = (w, h) => fullSize(Math.ceil(w / 2), Math.ceil(h / 2));   // soft glow needs no full-res buffers: ~4x cheaper
       composer.addPass(bloomPass);
       composer.addPass(new OutputPass());
     } catch (e) { composer = null; }                         // bloom is garnish; carry on without it
@@ -247,7 +249,7 @@ export async function start({ canvas, isChart }) {
     tmp.dir.copy(p).normalize();
     tmp.tan.crossVectors(UP, tmp.dir).normalize();
     tmp.off.copy(tmp.dir).multiplyScalar(-0.5).addScaledVector(tmp.tan, 0.82).addScaledVector(UP, 0.24).normalize();   // sun-side three-quarter view: lit face plus a terminator
-    const d = b.radius * (b.dist || 6.5) * (wide() ? 1 : 1.5);
+    const d = b.radius * (b.dist || 7.6) * (wide() ? 1 : 1.5);
     const cam = p.clone().addScaledVector(tmp.off, d);
     frame(p, cam, wide() ? 0.62 : 0, outPos, outTgt);
   }
@@ -258,8 +260,8 @@ export async function start({ canvas, isChart }) {
   }
   function finalKey(b, outPos, outTgt) {
     const p = b.group.position;
-    const cam = p.clone().multiplyScalar(1.28).addScaledVector(UP, 62);   // pull back past the last planet and look home
-    frame(p.clone().multiplyScalar(0.6), cam, wide() ? 0.24 : 0, outPos, outTgt);
+    const cam = p.clone().multiplyScalar(1.45).addScaledVector(UP, 70);   // pull back past the last planet and look home
+    frame(new THREE.Vector3(), cam, wide() ? 0.5 : 0, outPos, outTgt);    // the sun lands in the right third; the contact planet passes below
   }
   const posCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3()], false, 'centripetal');
   const tgtCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3()], false, 'centripetal');
@@ -312,6 +314,14 @@ export async function start({ canvas, isChart }) {
   }
   function draw() {
     if (composer && !chart) composer.render(); else renderer.render(scene, camera);
+  }
+  // Budget ~8ms/frame so a mid-range laptop holds 60fps: shed bloom first, then resolution
+  function adaptQuality() {
+    if (composer && !chart && gpuMs(renderer, draw) > 8) { composer = null; }
+    if (!lite && gpuMs(renderer, draw) > 8 && renderer.getPixelRatio() > 1) {
+      renderer.setPixelRatio(1); resize();
+      starMats.forEach(m => { m.uniforms.uPR.value = 1; });
+    }
   }
 
   /* ── Resize / layout changes ─────────────────────────────────────── */
@@ -384,13 +394,25 @@ export async function start({ canvas, isChart }) {
   updateWorld(0); updateAccent(k, 0); place(k);
   if (renderer.compileAsync) await renderer.compileAsync(scene, camera);
   draw();
+  adaptQuality();
   canvas.classList.add('is-ready');                          // CSS fades the canvas in over the static starfield
+  if (location.search.includes('scenedebug')) window.__scene = { scene, renderer, composer, bodies, nebula, corona, starMats, draw, setComposer: c => { composer = c; } };   // TEMP: perf bisection
   poke();
   return { bodies };
 }
 
 /* ── Helpers ───────────────────────────────────────────────────────── */
-function planetMaterial(style, colors, seed, bump, octaves, U) {
+// Time a few frames to completion (readPixels forces the GPU to finish), so the cost is measured, not guessed
+function gpuMs(renderer, draw, n = 6) {
+  const gl = renderer.getContext(), px = new Uint8Array(4);
+  draw(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  const t0 = performance.now();
+  for (let i = 0; i < n; i++) draw();
+  gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  return (performance.now() - t0) / n;
+}
+
+export function planetMaterial(style, colors, seed, bump, octaves, U) {
   return new THREE.ShaderMaterial({
     vertexShader: BODY_VS, fragmentShader: PLANET_FS,
     defines: { STYLE: style, OCTAVES: octaves },
@@ -400,7 +422,7 @@ function planetMaterial(style, colors, seed, bump, octaves, U) {
   });
 }
 
-function makeRingTexture() {
+export function makeRingTexture() {
   // 1D band profile on a canvas: soft ringlets, one clear gap, ragged inner/outer edges
   const c = document.createElement('canvas'); c.width = 1024; c.height = 4;
   const x = c.getContext('2d'), r = rng(7);
