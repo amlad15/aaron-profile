@@ -1,113 +1,336 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aaron Lad — Computer Science @ University of Alberta. Interactive 3D portfolio." />
-  <title>Aaron Lad — Portfolio</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aaron Lad · Developer &amp; IT Consultant, Edmonton</title>
+  <meta name="description" content="Aaron Lad: Computing Science, University of Alberta. Full-stack web apps, AI tools, and websites for Edmonton businesses. Open to new-grad roles and freelance web projects.">
+  <link rel="canonical" href="https://amlad15.github.io/aaron-profile/">
+  <meta name="theme-color" content="#0B1020">
+  <meta name="color-scheme" content="dark">
+
+  <!-- Link previews need absolute URLs; relative ones break on LinkedIn/Slack -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Aaron Lad">
+  <meta property="og:title" content="Aaron Lad · Developer &amp; IT Consultant">
+  <meta property="og:description" content="Full-stack web apps, AI tools, and websites for Edmonton businesses. Open to new-grad roles and freelance web projects.">
+  <meta property="og:url" content="https://amlad15.github.io/aaron-profile/">
+  <meta property="og:image" content="https://amlad15.github.io/aaron-profile/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Aaron Lad: developer and IT consultant in Edmonton">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Aaron Lad · Developer &amp; IT Consultant">
+  <meta name="twitter:description" content="Full-stack web apps, AI tools, and websites for Edmonton businesses.">
+  <meta name="twitter:image" content="https://amlad15.github.io/aaron-profile/assets/og-image.png">
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.png" type="image/png" sizes="64x64">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+  <link rel="stylesheet" href="css/site.css">
+  <script>document.documentElement.classList.add('js');</script><!-- set before paint so the mobile menu never flashes open -->
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- ── Three.js Canvas (full-viewport, behind all overlays) ─────────────── -->
-  <canvas id="portfolio-canvas"></canvas>
+  <header class="site-header">
+    <nav class="wrap nav" aria-label="Primary">
+      <a class="brand" href="#top">Aaron Lad</a>
+      <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="nav-menu">
+        <span class="menu-icon" aria-hidden="true"></span><span class="menu-label">Menu</span>
+      </button>
+      <ul id="nav-menu" class="nav-menu">
+<!-- build:nav -->
+<li><a href="#experience">Experience</a></li><li><a href="#services">Services</a></li><li><a href="#projects">Projects</a></li><li><a href="#skills">Skills</a></li><li><a href="#education">Education</a></li><li hidden data-cert-nav><a href="#certificates">Certificates</a></li><li><a href="#about">About</a></li><li><a href="#contact">Contact</a></li>
+<!-- /build:nav -->
+      </ul>
+    </nav>
+  </header>
 
-  <!-- ── Planet name labels (positioned each frame via JS) ──────────────── -->
-  <div id="planet-labels"></div>
+  <main id="main" tabindex="-1" data-content-hash="1417fec2">
+<!-- build:main -->
 
-  <!-- ── Moon name labels (shown when a planet is focused) ──────────────── -->
-  <div id="moon-labels"></div>
-
-  <!-- ══════════════════════════════════════════════════════════════════════
-       HUD OVERLAYS
-       All HUD elements are pointer-events:none so they don't block 3D clicks
-  ══════════════════════════════════════════════════════════════════════════ -->
-
-  <!-- Top-left: identity -->
-  <div id="hud-top-left">
-    <span class="hud-title">AARON LAD</span>
-    <span class="hud-subtitle">CS @ University of Alberta</span>
+<section id="top" class="hero" aria-labelledby="hero-title">
+  <div class="hero-sky" aria-hidden="true">
+    <svg class="orbit" viewBox="0 0 600 600"><circle cx="300" cy="300" r="220"/><circle cx="300" cy="300" r="290"/><circle class="orbit-dot" cx="520" cy="300" r="5"/></svg>
   </div>
-
-  <!-- Top-right: status + current planet -->
-  <div id="hud-top-right">
-    <span class="hud-status">● COMMS ONLINE</span>
-    <span id="hud-planet-name"></span>
-  </div>
-
-  <!-- Bottom-centre: instructions -->
-  <div id="hud-bottom">
-    <span>ORBITAL MECHANICS: INITIALIZED</span>
-    <span id="hud-instructions">CLICK PLANET TO EXPLORE &nbsp;·&nbsp; SCROLL TO ZOOM &nbsp;·&nbsp; DRAG TO ROTATE &nbsp;·&nbsp; ESC TO RESET</span>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════════════
-       INTERACTIVE UI ELEMENTS
-  ══════════════════════════════════════════════════════════════════════════ -->
-
-  <!-- Hover tooltip (follows cursor) -->
-  <div id="tooltip"></div>
-
-  <!-- Back-to-overview button (shown when a planet is focused) -->
-  <button id="back-btn" class="hidden">&#9668; BACK TO OVERVIEW</button>
-
-  <!-- ── Info Panel (slides in from right on moon click) ───────────────── -->
-  <div id="info-panel" class="hidden" role="dialog" aria-label="Moon information">
-
-    <!-- Close button -->
-    <button id="panel-close" aria-label="Close panel">&times;</button>
-
-    <!-- Optional screenshot / project image -->
-    <div id="panel-image-container" style="display:none;">
-      <img id="panel-image" src="" alt="" />
+  <div class="wrap hero-inner">
+    <p class="eyebrow">Edmonton, Alberta, Canada</p>
+    <h1 id="hero-title">Aaron Lad</h1>
+    <p class="pitch">Computing Science at the University of Alberta. I build full-stack web apps, AI tools, and websites for local businesses.</p>
+    <p class="status"><span class="status-dot" aria-hidden="true"></span>Open to new-grad roles and freelance web projects</p>
+    <div class="actions">
+      <a class="btn btn--primary" href="assets/AaronCV.pdf"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5"/></svg>Resume <span class="sr-note">(PDF)</span></a>
+      <a class="btn" href="https://github.com/amlad15"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>GitHub</a>
+      <a class="btn" href="https://www.linkedin.com/in/aaron-lad"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></svg>LinkedIn</a>
+      <a class="btn" href="mailto:ladaaron15@gmail.com"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 5h18v14H3zM3 6l9 7 9-7"/></svg>Email</a>
     </div>
-
-    <!-- Content -->
-    <div id="panel-content">
-      <div id="panel-tags"></div>
-      <h2 id="panel-title"></h2>
-      <h3 id="panel-subtitle"></h3>
-      <p  id="panel-description"></p>
-      <a  id="panel-link" href="#" target="_blank" rel="noopener noreferrer"
-          style="display:none;">OPEN LINK &#8599;</a>
-    </div>
-
+    <button type="button" class="link-3d" data-open-3d hidden>Explore this portfolio in 3D <span aria-hidden="true">→</span></button>
   </div>
+</section>
 
-  <!-- ══════════════════════════════════════════════════════════════════════
-       LOADING SCREEN
-  ══════════════════════════════════════════════════════════════════════════ -->
-  <div id="loading-screen">
-    <div class="loading-text">INITIALIZING ORBITAL SYSTEMS...</div>
-    <div class="loading-bar">
-      <div class="loading-progress"></div>
+<section id="experience" class="section" aria-labelledby="experience-title">
+  <div class="wrap">
+    <header class="section-head"><h2 id="experience-title">Experience</h2></header>
+    <ol class="timeline">
+    <li>
+      <article id="experience/aerocool" class="job">
+        <header>
+          <h3>IT Consultant <span class="job-type">Part-time contract</span></h3>
+          <p class="job-org">Aerocool System Air Solutions Ltd.</p>
+          <p class="meta">Sep 2026 – Present · Edmonton, AB</p>
+        </header>
+        <ul class="bullets"><li>Sole technical contact for the company&#39;s web, email and marketing infrastructure.</li><li>Built their Canadian website, aerocool.ca, with WordPress and Elementor.</li><li>Manage their Google Business Profile and Google Ads, and set up their Meta Page and ads.</li></ul>
+        <ul class="tags" aria-label="Tags"><li>WordPress</li><li>Elementor</li><li>Google Ads</li><li>Google Business Profile</li><li>Meta Ads</li></ul>
+        <a class="text-link" href="https://aerocool.ca">aerocool.ca<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
+      </article>
+    </li>
+    <li>
+      <article id="experience/guidepost" class="job">
+        <header>
+          <h3>Junior Sysadmin <span class="job-type">Internship</span></h3>
+          <p class="job-org">GuidePost Technologies Inc. <span class="muted">· Managed IT services provider</span></p>
+          <p class="meta">Apr 2026 – Aug 2026 · Edmonton, AB</p>
+        </header>
+        <ul class="bullets"><li>Microsoft 365 provisioning and access management for client organizations.</li><li>Automated admin work with PowerShell and Microsoft Graph across client tenants.</li><li>Set up and deployed client hardware.</li><li>Wrote SEO content, ran Google Ads and LinkedIn, and handled client communications.</li></ul>
+        <ul class="tags" aria-label="Tags"><li>Microsoft 365</li><li>PowerShell</li><li>Microsoft Graph</li><li>Hardware</li><li>SEO</li><li>Google Ads</li></ul>
+        
+      </article>
+    </li>
+    <li>
+      <article id="experience/unconventional" class="job">
+        <header>
+          <h3>Partner &amp; Head of Web Development</h3>
+          <p class="job-org">Unconventional Media Canada</p>
+          <p class="meta">Dec 2024 – Aug 2025 · Canada</p>
+        </header>
+        <ul class="bullets"><li>Led full-stack web development for 12+ client businesses across 5 industries, delivering responsive, accessible websites with a 2-week average turnaround.</li><li>Managed and mentored a team of 3 developers, enforcing code quality standards and WCAG accessibility compliance across 100% of client deadlines.</li><li>Drove 30%+ revenue growth through targeted outreach and long-term client relationships, helping the company reach profitability within 6 months.</li></ul>
+        <ul class="tags" aria-label="Tags"><li>Full-Stack</li><li>Team Lead</li><li>Web Development</li><li>Client Management</li></ul>
+        
+      </article>
+    </li>
+    <li>
+      <article id="experience/hydrotec" class="job job--compact">
+        <header>
+          <h3>Administrative &amp; Customer Acquisition Associate</h3>
+          <p class="job-org">Hydrotec International L.L.C.</p>
+          <p class="meta">Jan – Mar 2021 · May 2022 · Oman</p>
+        </header>
+        <ul class="bullets"><li>Qualified 50+ business leads and built a 120+ company prospect database that supported 3 closed deals; wrote 10+ outreach templates adopted company-wide.</li><li>Ran logistics for a 100+ attendee corporate event and maintained a 200+ contact CRM.</li></ul>
+        <ul class="tags" aria-label="Tags"><li>Sales</li><li>Lead Generation</li><li>CRM</li><li>Operations</li></ul>
+        
+      </article>
+    </li></ol>
+  </div>
+</section>
+
+<section id="services" class="section section--alt" aria-labelledby="services-title">
+  <div class="wrap">
+    <header class="section-head"><h2 id="services-title">Freelance &amp; Services</h2><p class="lede">I build websites and set up digital marketing for small businesses in Edmonton and across Alberta.</p></header>
+    <ul class="offerings"><li><h3>Websites</h3><p>Responsive, accessible business websites in WordPress/Elementor or custom code.</p></li><li><h3>Google presence</h3><p>Google Business Profile setup and upkeep, plus Google Ads campaigns.</p></li><li><h3>Social ads</h3><p>Meta (Facebook/Instagram) Page setup and ad campaigns.</p></li><li><h3>Ongoing tech support</h3><p>One point of contact for your website, email and marketing tools.</p></li></ul>
+    <article id="services/aerocool-case" class="case">
+      <div class="shot shot--empty" aria-hidden="true"><span>aerocool.ca</span></div>
+      <div class="case-body">
+        <p class="eyebrow">Case study · HVAC · Edmonton</p>
+        <h3>aerocool.ca <span class="muted">for Aerocool System Air Solutions</span></h3>
+        <ul class="bullets"><li>Built the Canadian website in WordPress with Elementor.</li><li>Set up and manage the Google Business Profile and Google Ads.</li><li>Set up the Meta Page and ads.</li><li>Ongoing sole technical contact for web, email and marketing.</li></ul>
+        <a class="text-link" href="https://aerocool.ca">Visit aerocool.ca<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
+      </div>
+    </article>
+    <p class="track">As Partner &amp; Head of Web Development at Unconventional Media Canada I led 12+ client websites across 5 industries, with a 2-week average turnaround and WCAG accessibility on every project.</p>
+    <a class="btn btn--primary btn--lg" href="mailto:ladaaron15@gmail.com?subject=Website%20project"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 5h18v14H3zM3 6l9 7 9-7"/></svg>Start a project</a>
+  </div>
+</section>
+
+<section id="projects" class="section" aria-labelledby="projects-title">
+  <div class="wrap">
+    <header class="section-head"><h2 id="projects-title">Projects</h2></header>
+    <div class="projects-grid">
+    <article id="projects/gcid" class="project project--featured">
+      <div class="shot shot--empty" aria-hidden="true"><span>Global Conflict Intelligence Dashboard</span></div>
+      <div class="project-body">
+        <h3>Global Conflict Intelligence Dashboard <a class="permalink" href="#projects/gcid" aria-label="Link to Global Conflict Intelligence Dashboard"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
+        <p class="meta">Jan – Mar 2026</p>
+        <p>Real-time OSINT map of live aircraft, ships, conflict events and breaking news.</p>
+        <ul class="bullets"><li>Integrated 4 external APIs (OpenSky, AISStream, ACLED, GDELT) with WebSocket streaming for sub-second live updates.</li><li>PostGIS spatial queries and anomaly detection across 200+ daily events.</li><li>Local Ollama LLM writes geopolitical intelligence summaries at zero API cost.</li></ul>
+        <ul class="tags" aria-label="Tags"><li>Next.js</li><li>TypeScript</li><li>Node.js</li><li>PostgreSQL</li><li>PostGIS</li><li>Socket.IO</li><li>Leaflet.js</li><li>Ollama</li><li>Docker</li></ul>
+        <div class="actions"><a class="btn btn--sm" href="https://github.com/amlad15/Global-Conflict-Intelligence-Dashboard"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>Code</a></div>
+      </div>
+    </article>
+    <article id="projects/deepforge" class="project project--featured">
+      <div class="shot shot--empty" aria-hidden="true"><span>DeepForge</span></div>
+      <div class="project-body">
+        <h3>DeepForge <a class="permalink" href="#projects/deepforge" aria-label="Link to DeepForge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
+        <p class="meta">Feb 2026</p>
+        <p>Multi-agent AI system that simulates a small software engineering team.</p>
+        <ul class="bullets"><li>Four CrewAI agents (Planner, Coder, Reviewer, Builder) each own one stage of development.</li><li>Runs fully locally on Ollama with DeepSeek Coder, with no external API dependency.</li><li>Explores prompt engineering, agent coordination and end-to-end automated pipelines.</li></ul>
+        <ul class="tags" aria-label="Tags"><li>Python</li><li>CrewAI</li><li>Ollama</li><li>DeepSeek Coder</li><li>AI Agents</li><li>Prompt Engineering</li></ul>
+        <div class="actions"><a class="btn btn--sm" href="https://github.com/amlad15/DeepForge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>Code</a></div>
+      </div>
+    </article>
+    <article id="projects/yt-spotify" class="project project--featured">
+      <div class="shot shot--empty" aria-hidden="true"><span>YT-Spotify Playlist Converter</span></div>
+      <div class="project-body">
+        <h3>YT-Spotify Playlist Converter <a class="permalink" href="#projects/yt-spotify" aria-label="Link to YT-Spotify Playlist Converter"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
+        <p class="meta">Mar 2026</p>
+        <p>Paste a playlist URL, sign in, and it&#39;s recreated on the other service in under 30 seconds.</p>
+        <ul class="bullets"><li>Dual OAuth via NextAuth.js keeps Spotify and Google tokens live at the same time without session conflicts.</li><li>Fuzzy title matching reaches 85%+ song match accuracy across varied playlists.</li></ul>
+        <ul class="tags" aria-label="Tags"><li>Next.js 14</li><li>TypeScript</li><li>Spotify API</li><li>YouTube API</li><li>NextAuth.js</li><li>OAuth</li><li>Vercel</li></ul>
+        
+      </div>
+    </article>
+    <article id="projects/algo-playground" class="project project--featured">
+      <div class="shot shot--empty" aria-hidden="true"><span>Algorithm Visual Playground</span></div>
+      <div class="project-body">
+        <h3>Algorithm Visual Playground <a class="permalink" href="#projects/algo-playground" aria-label="Link to Algorithm Visual Playground"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
+        <p class="meta">Aug 2025</p>
+        <p>Watch sorting and pathfinding algorithms run step by step.</p>
+        <ul class="bullets"><li>Sorting visualizer: Bubble, Merge and Quick Sort.</li><li>Pathfinding playground with walls: BFS, DFS, A* and Dijkstra.</li><li>Graph exploration where nodes light up as the search unfolds.</li></ul>
+        <ul class="tags" aria-label="Tags"><li>Python</li><li>Streamlit</li><li>Matplotlib</li><li>NumPy</li><li>Algorithms</li></ul>
+        <div class="actions"><a class="btn btn--sm" href="https://github.com/amlad15/Algorithm-Visual-Playground"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>Code</a></div>
+      </div>
+    </article></div>
+    <h3 class="subhead">More projects</h3><div class="projects-grid projects-grid--small">
+    <article id="projects/gitabot" class="project">
+      <div class="shot shot--empty" aria-hidden="true"><span>Gitabot</span></div>
+      <div class="project-body">
+        <h3>Gitabot <a class="permalink" href="#projects/gitabot" aria-label="Link to Gitabot"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
+        <p class="meta">Dec 2024 – Jan 2025</p>
+        <p>AI chatbot grounded in the Bhagavad Gita, used by 50+ beta users in a mobile app.</p>
+        <ul class="bullets"><li>Custom NLP dataset of 700+ verse-based Q&amp;A pairs across all 18 chapters.</li></ul>
+        <ul class="tags" aria-label="Tags"><li>Python</li><li>NLP</li><li>Mobile App</li><li>Dataset Curation</li></ul>
+        
+      </div>
+    </article>
+    <article id="projects/infodumper" class="project">
+      <div class="shot shot--empty" aria-hidden="true"><span>Infodumper</span></div>
+      <div class="project-body">
+        <h3>Infodumper <a class="permalink" href="#projects/infodumper" aria-label="Link to Infodumper"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></a></h3>
+        <p class="meta">Mar – Apr 2025</p>
+        <p>Experimental AI-generated YouTube channel that passed 30,000 organic views in a few weeks.</p>
+        <ul class="bullets"><li>Short videos on historical, religious and conspiracy topics, exploring AI for content creation and automation.</li></ul>
+        <ul class="tags" aria-label="Tags"><li>AI</li><li>Content Creation</li><li>Automation</li><li>Video</li></ul>
+        <div class="actions"><a class="btn btn--sm" href="https://www.youtube.com/@infodumperca"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M3 5h18v14H3zM10 9l5 3-5 3z"/></svg>Watch on YouTube</a></div>
+      </div>
+    </article></div>
+  </div>
+</section>
+
+<section id="skills" class="section section--alt" aria-labelledby="skills-title">
+  <div class="wrap">
+    <header class="section-head"><h2 id="skills-title">Skills</h2></header>
+    <div class="skills-grid">
+      <div class="skill-group">
+        <h3>Languages</h3>
+        <p class="muted small">Primary: Python &amp; TypeScript</p>
+        <ul class="tags tags--lg"><li>Python</li><li>TypeScript</li><li>JavaScript</li><li>SQL</li><li>HTML</li><li>CSS</li><li>Bash</li><li>PowerShell</li><li>YAML</li></ul>
+      </div>
+      <div class="skill-group">
+        <h3>Frameworks &amp; Libraries</h3>
+        <p class="muted small">Full-stack web &amp; real-time apps</p>
+        <ul class="tags tags--lg"><li>React</li><li>Next.js 14</li><li>Node.js</li><li>Express</li><li>Socket.IO</li><li>Leaflet.js</li><li>TailwindCSS</li><li>NextAuth.js</li><li>Streamlit</li></ul>
+      </div>
+      <div class="skill-group">
+        <h3>AI &amp; Machine Learning</h3>
+        <p class="muted small">Local LLM workflows &amp; agent systems</p>
+        <ul class="tags tags--lg"><li>LLM Integration</li><li>Ollama</li><li>CrewAI</li><li>Multi-Agent Systems</li><li>Prompt Engineering</li><li>NLP</li><li>DeepSeek</li><li>Llama 3</li><li>Mistral</li></ul>
+      </div>
+      <div class="skill-group">
+        <h3>Data &amp; Databases</h3>
+        <p class="muted small">Spatial databases &amp; real-time pipelines</p>
+        <ul class="tags tags--lg"><li>PostgreSQL</li><li>PostGIS</li><li>pgvector</li><li>MongoDB</li><li>REST APIs</li><li>WebSockets</li><li>Data Engineering</li><li>Power BI</li><li>Data Visualization</li></ul>
+      </div>
+      <div class="skill-group">
+        <h3>DevOps &amp; Cloud</h3>
+        <p class="muted small">Containers &amp; deployment</p>
+        <ul class="tags tags--lg"><li>Docker</li><li>Kubernetes</li><li>GitHub Actions</li><li>CI/CD</li><li>AWS</li><li>Vercel</li><li>Linux</li><li>Git</li></ul>
+      </div>
+      <div class="skill-group">
+        <h3>IT &amp; Marketing</h3>
+        <p class="muted small">From sysadmin and client work</p>
+        <ul class="tags tags--lg"><li>Microsoft 365</li><li>Microsoft Graph</li><li>WordPress</li><li>Elementor</li><li>Google Ads</li><li>Google Business Profile</li><li>Meta Ads</li><li>SEO</li></ul>
+      </div>
     </div>
   </div>
+</section>
 
-  <!-- ══════════════════════════════════════════════════════════════════════
-       SCRIPTS — CDN dependencies first, then application modules
-  ══════════════════════════════════════════════════════════════════════════ -->
+<section id="education" class="section" aria-labelledby="education-title">
+  <div class="wrap">
+    <header class="section-head"><h2 id="education-title">Education</h2></header>
+    
+    <article id="education/ualberta" class="edu">
+      <h3>BSc Computing Science, <span class="muted">Minor in Economics</span></h3>
+      <p class="job-org"><a class="text-link" href="https://www.ualberta.ca">University of Alberta</a></p>
+      <p class="meta">Since 2022 · Edmonton, AB</p>
+      <h4 class="small-head">Scholarships</h4><ul class="bullets"><li>Regional Excellence Scholarship: $5,000 CAD (2023)</li><li>International Admission Scholarship: $5,000 CAD (2022)</li></ul>
+    </article>
+  </div>
+</section>
 
-  <!-- Three.js r128 core -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<section id="certificates" class="section section--alt" aria-labelledby="certificates-title" hidden>
+  <div class="wrap">
+    <header class="section-head"><h2 id="certificates-title">Certificates</h2></header>
+    <ul class="certs" data-certs></ul>
+  </div>
+</section>
 
-  <!-- OrbitControls (adds THREE.OrbitControls to the THREE namespace) -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<section id="about" class="section" aria-labelledby="about-title">
+  <div class="wrap about">
+    <div>
+      <header class="section-head"><h2 id="about-title">About</h2></header>
+      <p class="prose">I was born in India and grew up across Oman, Bahrain and Dubai. Moving between cultures early taught me to adapt quickly and work well with people from very different backgrounds.</p><p class="prose">At the University of Alberta I&#39;ve focused on Computing Science with a minor in Economics. I&#39;m drawn to logic-driven problem solving and working with data, and I spend a lot of my spare time building full-stack apps and experimenting with local LLMs and AI agents.</p><p class="prose">Outside of code I&#39;m into cooking, gaming, film, football and Formula 1, markets and geopolitics, and travelling around India.</p>
+      <dl class="facts">
+        <div><dt>Languages</dt><dd>English, Hindi, Marathi, French (basic)</dd></div>
+        <div><dt>Background</dt><dd>Born in India · raised in Oman, Bahrain and Dubai · based in Edmonton</dd></div>
+      </dl>
+    </div>
+    <div>
+      <h3 class="subhead" id="interests">Interests</h3>
+      <ul class="interests"><li id="about/gaming"><h4>Gaming</h4><p>Tactical shooters, battle royales, sims and sandbox games: CS2, Valorant, Apex Legends, Call of Duty, War Thunder, Marvel Rivals, Minecraft.</p></li><li id="about/cinema"><h4>Cinema</h4><p>All-time favourites: The Godfather Part II, Interstellar and Whiplash. Personal ones: Tron, Frankenstein and Top Gun: Maverick.</p></li><li id="about/ai"><h4>AI &amp; Automation</h4><p>How AI can automate creative and technical work: local LLMs, multi-agent systems and AI-assisted content.</p></li><li id="about/finance"><h4>Economics, Finance &amp; Trading</h4><p>Financial markets, algorithmic trading and macro trends. I follow geopolitics closely, which is what led to the GCID dashboard.</p></li><li id="about/sports"><h4>Football &amp; Formula 1</h4><p>I enjoy the strategy and engineering behind F1 as much as the racing. Football connects me back to my roots and friendships.</p></li></ul>
+    </div>
+  </div>
+</section>
 
-  <!-- TWEEN.js for smooth camera animations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+<section id="contact" class="section section--alt" aria-labelledby="contact-title">
+  <div class="wrap">
+    <header class="section-head"><h2 id="contact-title">Contact</h2><p class="lede">Hiring for a new-grad role, or need a website for your business? Email is the best way to reach me. Based in Edmonton, Alberta, Canada.</p></header>
+    <ul class="contact-list"><li><a href="mailto:ladaaron15@gmail.com"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 5h18v14H3zM3 6l9 7 9-7"/></svg><span><span class="contact-label">Email</span><span class="contact-value">ladaaron15@gmail.com</span></span></a></li><li><a href="tel:+18253432012"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/></svg><span><span class="contact-label">Phone</span><span class="contact-value">(825) 343-2012</span></span></a></li><li><a href="https://www.linkedin.com/in/aaron-lad"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></svg><span><span class="contact-label">LinkedIn</span><span class="contact-value">linkedin.com/in/aaron-lad</span></span></a></li><li><a href="https://github.com/amlad15"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg><span><span class="contact-label">GitHub</span><span class="contact-value">github.com/amlad15</span></span></a></li><li><a href="assets/AaronCV.pdf"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5"/></svg><span><span class="contact-label">Resume</span><span class="contact-value">Download PDF</span></span></a></li>
+    </ul>
+  </div>
+</section>
+<!-- /build:main -->
+  </main>
 
-  <!-- Application modules (order matters: data → visuals → controls → entry) -->
-  <script src="js/planet-data.js"></script>
-  <script src="js/solar-system.js"></script>
-  <script src="js/particles.js"></script>
-  <script src="js/camera.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/interactions.js"></script>
-  <script src="js/main.js"></script>
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <p>© <span data-year>2026</span> Aaron Lad · Hand-built with plain HTML, CSS and JavaScript.</p>
+      <button type="button" class="link-3d" data-open-3d hidden>Explore in 3D</button>
+    </div>
+  </footer>
 
+  <!-- 3D mode shell: empty until opened; its CSS and scripts load on demand -->
+  <dialog id="space" class="space" aria-label="3D solar system view of this portfolio">
+    <canvas id="space-canvas" tabindex="0" aria-label="3D view. Use the section list to navigate; arrow keys rotate, plus and minus zoom."></canvas>
+    <div id="space-labels" class="space-labels"></div>
+    <div class="space-bar">
+      <p class="space-title">Explore in 3D</p>
+      <button type="button" class="space-btn" data-space-overview hidden>← Overview</button>
+      <button type="button" class="space-btn space-exit" data-space-exit>Exit 3D <span aria-hidden="true">✕</span></button>
+    </div>
+    <nav class="space-nav" aria-label="3D sections"><ul id="space-list"></ul></nav>
+    <aside id="space-panel" class="space-panel" aria-live="polite" hidden>
+      <button type="button" class="space-close" data-space-close aria-label="Close details">✕</button>
+      <div id="space-panel-body"></div>
+    </aside>
+    <p class="space-status" data-space-status role="status">Loading 3D scene…</p>
+  </dialog>
+
+  <script src="js/content.js" defer></script>
+  <script src="js/render.js" defer></script>
+  <script src="js/site.js" defer></script>
 </body>
 </html>
