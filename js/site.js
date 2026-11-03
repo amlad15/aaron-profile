@@ -148,9 +148,20 @@
   (function bootScene() {
     const canvas = $('.scene');
     if (!canvas) return;
-    let gl2 = false;
-    try { gl2 = !!document.createElement('canvas').getContext('webgl2'); } catch (_) {}
-    if (!gl2) return;                                        // current three.js needs WebGL2; the CSS starfield stays
+    // Needs WebGL2 on real graphics hardware. Software renderers (blocklisted GPUs, CI and audit machines) ran the
+    // scene at ~8fps and stalled the main thread for seconds compiling shaders, so they keep the CSS starfield.
+    // ?scene=force overrides this for testing.
+    const force = /[?&]scene=force(&|$)/.test(location.search);
+    let capable = false;
+    try {
+      const gl = document.createElement('canvas').getContext('webgl2', { failIfMajorPerformanceCaveat: !force });
+      const info = gl && gl.getExtension('WEBGL_debug_renderer_info');
+      const name = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : '';
+      capable = !!gl && (force || !/swiftshader|llvmpipe|softpipe|software|basic render/i.test(name));
+      const lose = gl && gl.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();                          // free the probe context straight away
+    } catch (_) {}
+    if (!capable) return;
     const go = () => import('./scene/scene.js')
       .then(m => m.start({ canvas, isChart: () => currentTheme() === 'light' }))
       .catch(err => console.warn('[scene] not started:', err && err.message));   // the page is complete without it

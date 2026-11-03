@@ -87,5 +87,6 @@ one planet per section, and the camera eases toward it every frame. Native scrol
 - **Performance:** loaded on the first interaction after `load` (scroll, touch, key, wheel, pointer) or ~2.5s after `load` in an idle slice, so it never competes with loading. DPR capped (1.5 desktop, 1 mobile), fewer
   octaves/segments/stars on phones, renders at ~30fps once the camera settles, pauses when the tab is hidden.
   It samples its first ~40 frames and drops bloom, then resolution, if they average under ~45fps.
-- **Fallbacks:** reduced motion shows one still per section with a cross-fade. With JS off, or without WebGL2 (required by
-  current three.js), a static CSS starfield is shown instead. The content works the same either way.
+- **Fallbacks:** reduced motion shows one still per section with a cross-fade. With JS off, without WebGL2 (required by
+  current three.js), or on a software renderer (blocklisted GPU, audit/CI machines), a static CSS starfield is shown instead.
+  The content works the same either way. Add `?scene=force` to the URL to run the scene on a software renderer for testing.
