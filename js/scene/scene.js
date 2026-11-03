@@ -8,6 +8,17 @@ import {
   BODY_VS, PLANET_FS, CLOUD_FS, ATMO_FS, SUN_FS, CORONA_VS, CORONA_FS,
   RING_VS, RING_FS, STAR_VS, STAR_FS, NEBULA_FS
 } from './shaders.js';
+import { createStreaks, createDust, createExtras, createFlare } from './travel.js';
+
+// Every effect strength in one place. README.md explains each setting and a sensible range.
+export const FX = {
+  warp:    { length: 0.16, startSpeed: 0.35, fullSpeed: 2.4, attack: 0.15, release: 0.6, starDim: 0.45, opacity: 0.85 },
+  fov:     { base: 40, punch: 8 },
+  path:    { arc: 0.45, bank: 4, lookAhead: 0.55 },
+  arrival: { duration: 1.6, sweep: 0.9, glowLift: 0.6, spinSlow: 0.35 },
+  extras:  { chance: 0.4, dust: 260, dustOpacity: 0.55, flare: 0.6, flareNear: 90, flareFar: 210 },
+  textFade: [0.5, 0.68]
+};
 
 THREE.ColorManagement.enabled = false;                       // palette hexes are display colours; skip linear conversion
 
@@ -50,14 +61,20 @@ export async function start({ canvas, isChart }) {
   renderer.setSize(...size(), false);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(40, size()[0] / size()[1], 0.1, 9000);
+  const camera = new THREE.PerspectiveCamera(FX.fov.base, size()[0] / size()[1], 0.1, 9000);
   const OCT = lite ? 3 : 5;                                  // fbm octaves: the biggest single GPU cost
   const SEG = lite ? 48 : 112;
 
   // Uniform objects shared by reference across every material, so one write updates the whole scene
   const U = {
     uTime: { value: 0 }, uChart: { value: 0 }, uSun: { value: new THREE.Vector3() },
-    uPaper: { value: C('#F3F0E8') }, uInk: { value: C('#2A2B2F') }, uAccentCol: { value: C('#FF6A2B') }
+    uPaper: { value: C('#F3F0E8') }, uInk: { value: C('#2A2B2F') }, uAccentCol: { value: C('#FF6A2B') },
+    uSweep: { value: FX.arrival.sweep }, uLift: { value: FX.arrival.glowLift }
+  };
+  // Shared by the streak and dust layers
+  const TU = {
+    uWarp: { value: 0 }, uLen: { value: FX.warp.length }, uFlip: { value: 1 }, uVP: { value: new THREE.Vector2() },
+    uFade: { value: new THREE.Vector2(...FX.textFade) }, uWide: { value: 1 }
   };
 
   /* ── Sun ─────────────────────────────────────────────────────────── */
@@ -73,6 +90,7 @@ export async function start({ canvas, isChart }) {
 
   /* ── Stars: three depth layers so camera travel produces parallax ─── */
   const starMats = [];
+  const streakSrc = [];
   const rand = rng(42);
   [[lite ? 450 : 2200, 650, 1.6, 2.6], [lite ? 350 : 1600, 1300, 1.2, 2.0], [lite ? 250 : 1100, 2600, 0.9, 1.5]].forEach(([n, r, s0, s1]) => {
     const pos = new Float32Array(n * 3), sz = new Float32Array(n), ph = new Float32Array(n);
@@ -82,15 +100,25 @@ export async function start({ canvas, isChart }) {
       sz[i] = s0 + (s1 - s0) * Math.pow(rand(), 3);          // mostly small, a few bright
       ph[i] = rand() * 6.283;
     }
+    if (r < 2000) streakSrc.push(lite ? pos.subarray(0, 300 * 3) : pos);   // the nearer layers carry the warp
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setAttribute('aSize', new THREE.BufferAttribute(sz, 1));
     g.setAttribute('aPhase', new THREE.BufferAttribute(ph, 1));
     const m = new THREE.ShaderMaterial({ vertexShader: STAR_VS, fragmentShader: STAR_FS, transparent: true, depthWrite: false,
-      uniforms: { ...U, uPR: { value: renderer.getPixelRatio() }, uColor: { value: C('#ECE8DF') } } });
+      uniforms: { ...U, uPR: { value: renderer.getPixelRatio() }, uColor: { value: C('#ECE8DF') }, uDim: { value: 0 } } });
     starMats.push(m);
     scene.add(new THREE.Points(g, m));
   });
+
+  const streakPos = new Float32Array(streakSrc.reduce((n, a) => n + a.length, 0));
+  streakSrc.reduce((o, a) => { streakPos.set(a, o); return o + a.length; }, 0);
+  const streaks = createStreaks(streakPos, TU);
+  scene.add(streaks);
+  const dust = lite ? null : createDust(FX.extras.dust, 60, TU, rng(9));   // phones skip dust, comets and flare
+  if (dust) scene.add(dust);
+  const extras = lite ? null : createExtras(scene, rng(11));
+  const flare = lite ? null : createFlare();
 
   /* ── Nebula wash (dark theme only) ───────────────────────────────── */
   const nebula = new THREE.Mesh(new THREE.SphereGeometry(3800, 32, 16),
@@ -115,7 +143,7 @@ export async function start({ canvas, isChart }) {
     spin.add(new THREE.Mesh(new THREE.SphereGeometry(b.radius, SEG, SEG / 2), mat));
     const atmo = new THREE.Mesh(new THREE.SphereGeometry(b.radius * 1.06, SEG / 2, SEG / 4),
       new THREE.ShaderMaterial({ vertexShader: BODY_VS, fragmentShader: ATMO_FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-        uniforms: { ...U, uAtmo: { value: C(b.atmo) }, uAccent: { value: 0 }, uStrength: { value: 0.8 } } }));
+        uniforms: { ...U, uAtmo: { value: C(b.atmo) }, uAccent: { value: 0 }, uStrength: { value: 0.8 }, uArrive: { value: 0 } } }));
     group.add(atmo);
     let clouds = null;
     if (b.clouds) {
@@ -157,7 +185,7 @@ export async function start({ canvas, isChart }) {
     scene.add(line); orbitLines.push(line);
 
     scene.add(group);
-    bodies.push({ ...b, el, group, spin, mat, atmo, clouds, ring, moons, satellite, line, accent: 0 });
+    bodies.push({ ...b, el, group, spin, mat, atmo, clouds, ring, moons, satellite, line, accent: 0, spinAngle: b.seed, arriveT0: -1 });
     await yieldToBrowser();                                  // build one planet per idle slice: no long tasks
   }
 
@@ -195,6 +223,9 @@ export async function start({ canvas, isChart }) {
     U.uAccentCol.value.set(t.accent); U.uInk.value.set(t.ink); U.uPaper.value.set(t.paper);
     renderer.setClearColor(t.bg, 1);
     starMats.forEach(m => m.uniforms.uColor.value.set(t.star));
+    streaks.material.uniforms.uColor.value.set(t.star);
+    if (dust) dust.visible = !chart;                          // dust, comets and flare are light effects: dark theme only
+    if (extras && chart) extras.clear();
     nebula.visible = !chart;
     const add = chart ? THREE.NormalBlending : THREE.AdditiveBlending;   // additive glow vanishes on paper
     coronaMat.blending = add; coronaMat.needsUpdate = true;
@@ -217,8 +248,8 @@ export async function start({ canvas, isChart }) {
     let prev = 0;
     active.forEach((b, j) => {
       const top = b.el.getBoundingClientRect().top + scrollY;
-      let s0 = Math.min(Math.max(top - vh * 0.85, prev), max);   // start travelling as the section rises into view
-      let s1 = Math.min(Math.max(top - vh * 0.2, s0 + 1), max);  // arrive as its heading nears the top
+      let s0 = Math.min(Math.max(top - vh * 1.0, prev), max);    // start travelling as the section enters the viewport
+      let s1 = Math.min(Math.max(top - vh * 0.5, s0 + 1), max);  // arrive with the heading mid-screen, where its reveal lands
       if (j === active.length - 1) s1 = Math.max(s0 + 1, Math.min(s1, max));   // the last stop must be reachable
       knots.push([s0, j], [s1, j + 1]);
       prev = s1;
@@ -266,12 +297,26 @@ export async function start({ canvas, isChart }) {
   }
   const posCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3()], false, 'centripetal');
   const tgtCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3()], false, 'centripetal');
+  const bankSign = [];
+  const mid = new THREE.Vector3(), seg = new THREE.Vector3(), side = new THREE.Vector3();
   function updateKeys() {
-    const n = active.length + 1;
-    while (posCurve.points.length < n) { posCurve.points.push(new THREE.Vector3()); tgtCurve.points.push(new THREE.Vector3()); }
-    posCurve.points.length = tgtCurve.points.length = n;
-    heroKey(posCurve.points[0], tgtCurve.points[0]);
-    active.forEach((b, j) => (j === active.length - 1 ? finalKey : planetKey)(b, posCurve.points[j + 1], tgtCurve.points[j + 1]));
+    const n = active.length + 1, m = n * 2 - 1;
+    while (posCurve.points.length < m) { posCurve.points.push(new THREE.Vector3()); tgtCurve.points.push(new THREE.Vector3()); }
+    posCurve.points.length = tgtCurve.points.length = m;
+    const P = posCurve.points, T = tgtCurve.points;
+    heroKey(P[0], T[0]);
+    active.forEach((b, j) => (j === active.length - 1 ? finalKey : planetKey)(b, P[(j + 1) * 2], T[(j + 1) * 2]));
+    for (let i = 1; i < m; i += 2) {
+      const A = P[i - 1], B = P[i + 1];
+      seg.subVectors(B, A);
+      const len = seg.length();
+      side.crossVectors(seg, UP).normalize();
+      mid.addVectors(A, B).multiplyScalar(0.5);
+      const out = Math.sign(side.dot(mid)) || 1;              // swing outward, away from the sun, so the path arcs around
+      P[i].copy(mid).addScaledVector(side, out * len * FX.path.arc * 0.5).addScaledVector(UP, len * FX.path.arc * 0.12);
+      T[i].addVectors(T[i - 1], T[i + 1]).multiplyScalar(0.5);
+      bankSign[(i - 1) / 2] = -out;                            // roll into the inside of the curve
+    }
   }
 
   /* ── World update ────────────────────────────────────────────────── */
@@ -281,7 +326,13 @@ export async function start({ canvas, isChart }) {
     bodies.forEach(b => {
       const a = b.angle + time * 0.004 * Math.sqrt(46 / b.orbit);   // outer planets drift slower
       b.group.position.set(Math.cos(a) * b.orbit, Math.sin(a * 2.0) * b.orbit * 0.03, Math.sin(a) * b.orbit);
-      b.spin.rotation.y = time * 0.05 + b.seed;
+      b.spinAngle += dt * 0.05 * (1 + (FX.arrival.spinSlow - 1) * b.accent);   // matched orbit: the focused planet turns slower
+      b.spin.rotation.y = b.spinAngle;
+      const ap = b.arriveT0 < 0 ? 0 : (time - b.arriveT0) / FX.arrival.duration;
+      const arrive = ap > 0 && ap < 1 ? ap : 0;
+      b.atmo.material.uniforms.uArrive.value = arrive;
+      b.mat.uniforms.uArrive.value = arrive;
+      if (ap >= 1) b.arriveT0 = -1;
       if (b.clouds) b.clouds.rotation.y = time * 0.012;      // clouds drift against the surface
       if (b.ring) b.ring.material.uniforms.uCenter.value.copy(b.group.position);
       b.moons.forEach((m, i) => {
@@ -304,17 +355,29 @@ export async function start({ canvas, isChart }) {
     });
   }
 
-  const posNow = new THREE.Vector3(), tgtNow = new THREE.Vector3();
-  function place(k) {
+  const posNow = new THREE.Vector3(), tgtNow = new THREE.Vector3(), ahead = new THREE.Vector3(), lookDir = new THREE.Vector3(), aheadDir = new THREE.Vector3();
+  function place(k, warp = 0) {
     updateKeys();
-    const u = active.length ? k / active.length : 0;
+    const n = active.length;
+    const u = n ? k / n : 0;
     posCurve.getPoint(u, posNow); tgtCurve.getPoint(u, tgtNow);
+    const transit = Math.sin(Math.PI * (k - Math.floor(k)));   // 0 at each planet, 1 mid-journey
+    lookDir.subVectors(tgtNow, posNow).normalize();
+    if (transit > 0.001 && n) {
+      posCurve.getPoint(Math.min(1, u + 0.3 / n), ahead);
+      aheadDir.subVectors(ahead, posNow).normalize();
+      lookDir.lerp(aheadDir, transit * FX.path.lookAhead).normalize();   // face the direction of travel, settle onto the planet on arrival
+    }
     camera.position.copy(posNow);
-    camera.lookAt(tgtNow);
+    camera.lookAt(ahead.copy(posNow).add(lookDir));
+    camera.rotateZ(THREE.MathUtils.degToRad(FX.path.bank) * transit * (bankSign[Math.floor(k)] || 0));
+    const fov = FX.fov.base + FX.fov.punch * warp * warp * (3 - 2 * warp);
+    if (Math.abs(camera.fov - fov) > 0.01) { camera.fov = fov; camera.updateProjectionMatrix(); }
     corona.quaternion.copy(camera.quaternion);              // corona always faces the viewer
   }
   function draw() {
     if (composer && !chart) composer.render(); else renderer.render(scene, camera);
+    if (flare && !chart) flare.render(renderer);
   }
   // Adaptive quality from real frame intervals (no blocking GPU sync): if the first ~40 active frames
   // average under ~45fps, shed bloom; if still slow, drop to 1x resolution
@@ -329,6 +392,59 @@ export async function start({ canvas, isChart }) {
     if (perf.step === 0 && composer) { composer = null; perf.step = 1; return; }
     if (renderer.getPixelRatio() > 1) { renderer.setPixelRatio(1); resize(); starMats.forEach(m => { m.uniforms.uPR.value = 1; }); }
     perf.step = 2;
+  }
+
+  /* ── Travel effects ──────────────────────────────────────────────── */
+  let warp = 0, prevK = 0, arrivedIdx = -1, transitTo = -1;
+  const prevPos = new THREE.Vector3(), vel = new THREE.Vector3(), vp = new THREE.Vector4(), sunNdc = new THREE.Vector3();
+  const sideFade = x => (wide() ? THREE.MathUtils.smoothstep(x, FX.textFade[0], FX.textFade[1]) : 0.6);
+  function updateTravel(dt, target) {
+    const speed = dt ? Math.abs(k - prevK) / dt : 0;         // keyframes per second: a calm proxy for scroll velocity
+    prevK = k;
+    const want = THREE.MathUtils.clamp((speed - FX.warp.startSpeed) / (FX.warp.fullSpeed - FX.warp.startSpeed), 0, 1);
+    const tau = want > warp ? FX.warp.attack : FX.warp.release / 3;
+    warp += (want - warp) * (dt ? 1 - Math.exp(-dt / tau) : 1);
+    if (warp < 0.001) warp = 0;
+
+    vel.subVectors(camera.position, prevPos);
+    if (vel.lengthSq() > 1e-6) vel.normalize(); else vel.set(0, 0, 0);
+    prevPos.copy(camera.position);
+    vp.set(camera.position.x + vel.x * 1000, camera.position.y + vel.y * 1000, camera.position.z + vel.z * 1000, 1).applyMatrix4(camera.matrixWorldInverse).applyMatrix4(camera.projectionMatrix);
+    TU.uFlip.value = vp.w < 0 ? -1 : 1;                       // moving backwards: streaks converge instead
+    TU.uVP.value.set(vp.x / Math.abs(vp.w || 1), vp.y / Math.abs(vp.w || 1));
+    TU.uWarp.value = warp;
+    TU.uWide.value = wide() ? 1 : 0;
+    streaks.material.uniforms.uAlpha.value = THREE.MathUtils.smoothstep(warp, 0.02, 0.3) * FX.warp.opacity * (chart ? 0.55 : 1);
+    starMats.forEach(m => { m.uniforms.uDim.value = warp * FX.warp.starDim; });
+    if (dust) dust.material.uniforms.uAlpha.value = FX.extras.dustOpacity * Math.min(1, 0.25 + warp * 1.5);
+
+    // Now and then, something drifts through the frame mid-transit
+    const dest = Math.round(target);
+    if (extras && !chart && dest !== transitTo && Math.abs(target - k) > 0.4) {
+      transitTo = dest;
+      const r = Math.random();
+      if (r < FX.extras.chance) extras.spawn(r < FX.extras.chance / 2 ? 'comet' : 'rocks', camera, wide() ? 0.55 : 0.2);
+    }
+    if (extras) extras.update(dt, chart ? 0 : 1);
+
+    // Glare when the path passes near the sun
+    if (flare) {
+      sunNdc.set(0, 0, 0).project(camera);
+      const onScreen = sunNdc.z < 1 && Math.abs(sunNdc.x) < 1.3 && Math.abs(sunNdc.y) < 1.3;
+      const near = 1 - THREE.MathUtils.smoothstep(camera.position.length(), FX.extras.flareNear, FX.extras.flareFar);
+      flare.update(sunNdc, onScreen && !chart ? FX.extras.flare * near : 0, camera.aspect, sideFade);
+    }
+
+    // Arrival: the planet's moment, and the cue for its heading to land
+    const at = Math.round(k);
+    if (arrivedIdx !== -1 && Math.abs(k - arrivedIdx) > 0.5) arrivedIdx = -1;
+    if (arrivedIdx === -1 && Math.abs(k - at) < 0.03 && Math.abs(target - at) < 0.03) arrive(at, true);
+  }
+  function arrive(idx, animate) {
+    arrivedIdx = idx;
+    const b = active[idx - 1];
+    if (b && animate) b.arriveT0 = time;
+    document.dispatchEvent(new CustomEvent('scene:arrive', { detail: { section: b ? b.section : 'top' } }));
   }
 
   /* ── Resize / layout changes ─────────────────────────────────────── */
@@ -368,8 +484,8 @@ export async function start({ canvas, isChart }) {
     if (Math.abs(target - k) < 0.0004) k = target;
     const moving = k !== target || now - lastScroll < 400 || dirty;
     frameN++;
-    if (moving || frameN % 2 === 0) {                         // settled: 30fps is plenty for orbits this slow
-      updateWorld(dt); updateAccent(k, dt); place(k); draw();
+    if (moving || warp > 0 || frameN % 2 === 0) {             // settled: 30fps is plenty for orbits this slow
+      updateWorld(dt); updateAccent(k, dt); place(k, warp); updateTravel(dt, target); draw();
       dirty = false;
       if (moving) samplePerf(dt * 1000);                     // only frames rendered back to back say anything about speed
     }
@@ -386,6 +502,7 @@ export async function start({ canvas, isChart }) {
     }
     k = idx;
     updateWorld(0); updateAccent(k, 0); place(k); draw();
+    if (arrivedIdx !== idx) arrive(idx, false);              // headings still reveal, without the arrival effect
   }
 
   addEventListener('scroll', () => { lastScroll = performance.now(); poke(); }, { passive: true });
@@ -400,12 +517,15 @@ export async function start({ canvas, isChart }) {
   k = scrollToK(scrollY);                                    // deep links / mid-page reloads: no fly-in
   if (reduced) k = Math.round(k);
   updateWorld(0); updateAccent(k, 0); place(k);
+  prevPos.copy(camera.position); prevK = k;                  // no warp on load: the camera starts at rest
   if (renderer.extensions.has('KHR_parallel_shader_compile')) await renderer.compileAsync(scene, camera);   // compile off the main thread where the GPU allows
   else {
     for (const o of [...scene.children]) { renderer.compile(o, camera, scene); await yieldToBrowser(); }   // no parallel compile: one object per idle slice
   }
   draw();
   canvas.classList.add('is-ready');                          // CSS fades the canvas in over the static starfield
+  document.documentElement.classList.add('scene-live');
+  if (Math.abs(k - Math.round(k)) < 0.03) arrive(Math.round(k), false);   // already at a planet (top or a deep link): reveal its heading now
   poke();
   return { bodies };
 }
@@ -417,7 +537,7 @@ export function planetMaterial(style, colors, seed, bump, octaves, U) {
     vertexShader: BODY_VS, fragmentShader: PLANET_FS,
     defines: { STYLE: style, OCTAVES: octaves },
     extensions: { derivatives: true },
-    uniforms: { ...U, uSeed: { value: seed }, uBump: { value: bump }, uAccent: { value: 0 }, uGlow: { value: 0 }, uPulse: { value: 0 },
+    uniforms: { ...U, uSeed: { value: seed }, uBump: { value: bump }, uAccent: { value: 0 }, uGlow: { value: 0 }, uPulse: { value: 0 }, uArrive: { value: 0 },
       uC0: { value: C(colors[0]) }, uC1: { value: C(colors[1]) }, uC2: { value: C(colors[2]) }, uC3: { value: C(colors[3]) } }
   });
 }

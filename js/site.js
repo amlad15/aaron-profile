@@ -69,10 +69,20 @@
       const sibs = $$(':scope > [data-reveal]', el.parentElement);
       el.style.setProperty('--i', Math.min(sibs.indexOf(el), 6));
     });
+    // With the scene running, a section heading waits for its planet's arrival so the two land together.
+    // A short fallback means a heading can never stay hidden if the arrival never comes.
+    const waiting = new Map();
+    const show = el => { el.classList.add('is-in'); waiting.delete(el); };
+    document.addEventListener('scene:arrive', e => {
+      waiting.forEach((_, el) => { if (el.closest('section') && el.closest('section').id === e.detail.section) show(el); });
+    });
     const io = new IntersectionObserver(entries => entries.forEach(en => {
       if (!en.isIntersecting) return;
-      en.target.classList.add('is-in');
       io.unobserve(en.target);                               // reveal once; no re-hiding on scroll back
+      if (root.classList.contains('scene-live') && en.target.matches('.sec-head')) {
+        waiting.set(en.target, true);
+        setTimeout(() => waiting.has(en.target) && show(en.target), 1600);
+      } else show(en.target);
     }), { rootMargin: '0px 0px -8% 0px' });
     const vh = innerHeight;
     items.forEach(el => {

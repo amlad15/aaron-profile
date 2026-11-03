@@ -80,7 +80,7 @@ void main() {
 // differences, so no 2x2-quad derivative speckle) and the contour lines of the light-theme chart.
 export const PLANET_FS = /* glsl */`
 uniform vec3 uSun;
-uniform float uTime, uSeed, uBump, uChart, uAccent, uGlow, uPulse;
+uniform float uTime, uSeed, uBump, uChart, uAccent, uGlow, uPulse, uArrive;
 uniform vec3 uC0, uC1, uC2, uC3, uPaper, uInk, uAccentCol;
 varying vec3 vObj;
 varying vec3 vNormalW;
@@ -118,7 +118,7 @@ vec3 chartShade(vec3 N0, vec3 V, float ndl, float field) {
   float lat = asin(clamp(vObj.y, -1.0, 1.0)) * 1.9099;                     // 3 bands per hemisphere: a light graticule
   float lon = atan(vObj.z, vObj.x) * 0.9549;                               // 6 meridians
   c = mix(c, uInk, max(gridLine(lat), gridLine(lon)) * 0.07);
-  float edge = smoothstep(0.8, 0.95, 1.0 - max(dot(N0, V), 0.0));
+  float edge = smoothstep(0.8 - 0.08 * sin(3.14159 * clamp(uArrive, 0.0, 1.0)), 0.95, 1.0 - max(dot(N0, V), 0.0));
   return mix(c, mix(uInk, uAccentCol, uAccent), edge * 0.92);             // ink outline, orange only for the active section
 }
 void main() {
@@ -224,7 +224,7 @@ void main() {
 // Fresnel rim glow, lit side only; additive in dark mode, a thin accent halo in chart mode
 export const ATMO_FS = /* glsl */`
 uniform vec3 uSun, uAtmo, uAccentCol;
-uniform float uAccent, uStrength, uChart;
+uniform float uAccent, uStrength, uChart, uArrive, uSweep, uLift;
 varying vec3 vObj;
 varying vec3 vNormalW;
 varying vec3 vPosW;
@@ -233,9 +233,12 @@ void main() {
   vec3 V = normalize(cameraPosition - vPosW);
   float f = pow(1.0 - max(dot(N, V), 0.0), 3.2);
   if (uChart > 0.5) discard;                                                // on paper the ink outline carries the accent
-  float day = smoothstep(-0.35, 0.45, dot(N, normalize(uSun - vPosW)));
-  vec3 c = mix(uAtmo, uAccentCol, uAccent * 0.7);                           // a warm tint, not a neon ring
-  float a = f * (0.08 + day) * uStrength * (1.0 + uAccent * 0.2);
+  vec3 L = normalize(uSun - vPosW);
+  float day = smoothstep(-0.35, 0.45, dot(N, L));
+  float pulse = sin(3.14159 * clamp(uArrive, 0.0, 1.0));
+  float band = exp(-pow((dot(N, L) - mix(-1.1, 1.1, uArrive)) * 3.5, 2.0)) * pulse;   // arrival: a rim light sweeping from the night limb to the day side
+  vec3 c = mix(uAtmo, uAccentCol, uAccent * 0.7);
+  float a = f * (0.08 + day) * uStrength * (1.0 + uAccent * 0.2) * (1.0 + uLift * pulse) + pow(f, 0.6) * band * uSweep;
   gl_FragColor = vec4(c * a, a);
 }
 `;
@@ -338,11 +341,11 @@ void main() {
 `;
 export const STAR_FS = /* glsl */`
 uniform vec3 uColor;
-uniform float uChart;
+uniform float uChart, uDim;
 varying float vAlpha;
 void main() {
   float d = length(gl_PointCoord - 0.5);
-  float a = smoothstep(0.5, 0.05, d) * vAlpha;
+  float a = smoothstep(0.5, 0.05, d) * vAlpha * (1.0 - uDim);
   gl_FragColor = vec4(uColor, a * (uChart > 0.5 ? 0.42 : 1.0));
 }
 `;
@@ -360,5 +363,48 @@ void main() {
   float m = fbm(d * 4.5 - 1.7);
   vec3 c = mix(vec3(0.16, 0.09, 0.06), vec3(0.06, 0.09, 0.13), 0.5 + 0.5 * m);   // warm dust into cold gas
   gl_FragColor = vec4(c * smoothstep(-0.1, 0.75, n) * uStrength, 1.0);
+}
+`;
+
+// Warp streaks: each star (or dust mote) is a 2-vertex line; the tail is pulled back toward the
+// vanishing point of travel by an amount scaled with speed, so a fast fling reads as a hyperspace rush.
+export const STREAK_VS = /* glsl */`
+attribute float aTail;
+uniform float uWarp, uLen, uFlip, uMinLen, uBox;
+uniform vec2 uVP;
+varying float vT;
+varying float vX;
+varying float vNear;
+void main() {
+#ifdef DUST
+  vec3 rel = mod(position - cameraPosition + uBox * 0.5, uBox) - uBox * 0.5;
+  vec3 world = cameraPosition + rel;
+  vNear = smoothstep(uBox * 0.5, uBox * 0.15, length(rel)) * smoothstep(0.6, 2.5, length(rel));
+#else
+  vec3 world = (modelMatrix * vec4(position, 1.0)).xyz;
+  vNear = 1.0;
+#endif
+  vec4 clip = projectionMatrix * viewMatrix * vec4(world, 1.0);
+  vec2 ndc = clip.xy / clip.w;
+  vec2 d = (ndc - uVP) * uFlip;
+  float l = length(d);
+  vec2 dir = l > 1e-4 ? d / l : vec2(0.0);
+  ndc -= dir * aTail * (uMinLen + uWarp * uLen * (0.25 + l));
+  vT = aTail;
+  vX = ndc.x * 0.5 + 0.5;
+  gl_Position = vec4(ndc * clip.w, clip.z, clip.w);
+}
+`;
+export const STREAK_FS = /* glsl */`
+uniform vec3 uColor;
+uniform float uWarp, uAlpha, uWide;
+uniform vec2 uFade;
+varying float vT;
+varying float vX;
+varying float vNear;
+void main() {
+  float side = uWide > 0.5 ? smoothstep(uFade.x, uFade.y, vX) : 0.6;
+  float a = uAlpha * (1.0 - vT * 0.85) * side * vNear;
+  gl_FragColor = vec4(uColor, a);
 }
 `;
