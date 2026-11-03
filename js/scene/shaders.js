@@ -330,12 +330,12 @@ void main() {
 export const STAR_VS = /* glsl */`
 attribute float aSize;
 attribute float aPhase;
-uniform float uTime, uPR, uChart;
+uniform float uTime, uPR, uChart, uNear;
 varying float vAlpha;
 void main() {
   vAlpha = 0.6 + 0.4 * sin(uTime * 0.5 + aPhase);
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
-  gl_PointSize = aSize * uPR * (uChart > 0.5 ? 0.85 : 1.0);
+  gl_PointSize = aSize * uPR * (uChart > 0.5 ? 0.85 : 1.0) * clamp(uNear / max(1.0, -mv.z), 1.0, 2.2);
   gl_Position = projectionMatrix * mv;
 }
 `;
@@ -366,12 +366,14 @@ void main() {
 }
 `;
 
-// Warp streaks: each star (or dust mote) is a 2-vertex line; the tail is pulled back toward the
-// vanishing point of travel by an amount scaled with speed, so a fast fling reads as a hyperspace rush.
+// Warp streaks: each star (or dust mote) is a 2-vertex line. The tail sits where the point was on screen a
+// moment ago (uPrevVP is the camera a little way back along the route), so near stars streak more than far ones,
+// plus a small pull toward the vanishing point that grows with speed.
 export const STREAK_VS = /* glsl */`
 attribute float aTail;
-uniform float uWarp, uLen, uFlip, uMinLen, uBox;
+uniform float uWarp, uLen, uFlip, uMinLen, uBox, uRadial;
 uniform vec2 uVP;
+uniform mat4 uPrevVP;
 varying float vT;
 varying float vX;
 varying float vNear;
@@ -386,10 +388,15 @@ void main() {
 #endif
   vec4 clip = projectionMatrix * viewMatrix * vec4(world, 1.0);
   vec2 ndc = clip.xy / clip.w;
+  vec4 pc = uPrevVP * vec4(world, 1.0);
+  vec2 m = (pc.w > 0.5 && clip.w > 0.5) ? ndc - pc.xy / pc.w : vec2(0.0);
   vec2 d = (ndc - uVP) * uFlip;
   float l = length(d);
   vec2 dir = l > 1e-4 ? d / l : vec2(0.0);
-  ndc -= dir * aTail * (uMinLen + uWarp * uLen * (0.25 + l));
+  m += dir * (uMinLen + uWarp * uRadial * (0.25 + l));
+  float ml = length(m);
+  if (ml > uLen) m *= uLen / ml;
+  ndc -= m * aTail;
   vT = aTail;
   vX = ndc.x * 0.5 + 0.5;
   gl_Position = vec4(ndc * clip.w, clip.z, clip.w);
