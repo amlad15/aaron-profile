@@ -154,8 +154,8 @@
     const go = () => import('./scene/scene.js')
       .then(m => m.start({ canvas, isChart: () => currentTheme() === 'light' }))
       .catch(err => console.warn('[scene] not started:', err && err.message));   // the page is complete without it
-    // Decorative, so it waits for the visitor's first interaction after load. Until then the static CSS starfield
-    // carries the first impression; no WebGL work competes with loading, and devices that never interact never pay for it.
+    // Decorative, so it waits: the first interaction after load (scroll, touch, key, wheel, pointer) or ~2.5s after
+    // load in an idle slice, whichever comes first. Until the canvas fades in, the static CSS starfield stays.
     let started = false;
     const EVENTS = ['scroll', 'pointerdown', 'pointermove', 'keydown', 'touchstart', 'wheel'];
     const once = () => {
@@ -164,7 +164,10 @@
       EVENTS.forEach(e => removeEventListener(e, once));
       window.requestIdleCallback ? requestIdleCallback(go, { timeout: 500 }) : setTimeout(go, 50);   // let the interaction's own frame paint first
     };
-    const arm = () => EVENTS.forEach(e => addEventListener(e, once, { passive: true }));
+    const arm = () => {
+      EVENTS.forEach(e => addEventListener(e, once, { passive: true }));   // phones: touchstart/scroll; desktop: pointer/wheel/keys
+      setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(once, { timeout: 1000 }) : once()), 2500);   // readers who never interact still get the planets
+    };
     if (document.readyState === 'complete') arm(); else addEventListener('load', arm, { once: true });
   }());
 
