@@ -154,8 +154,18 @@
     const go = () => import('./scene/scene.js')
       .then(m => m.start({ canvas, isChart: () => currentTheme() === 'light' }))
       .catch(err => console.warn('[scene] not started:', err && err.message));   // the page is complete without it
-    const later = () => (window.requestIdleCallback ? requestIdleCallback(go, { timeout: 3000 }) : setTimeout(go, 1500));
-    if (document.readyState === 'complete') later(); else addEventListener('load', later, { once: true });
+    // Decorative, so it waits for the visitor's first interaction after load. Until then the static CSS starfield
+    // carries the first impression; no WebGL work competes with loading, and devices that never interact never pay for it.
+    let started = false;
+    const EVENTS = ['scroll', 'pointerdown', 'pointermove', 'keydown', 'touchstart', 'wheel'];
+    const once = () => {
+      if (started) return;
+      started = true;
+      EVENTS.forEach(e => removeEventListener(e, once));
+      window.requestIdleCallback ? requestIdleCallback(go, { timeout: 500 }) : setTimeout(go, 50);   // let the interaction's own frame paint first
+    };
+    const arm = () => EVENTS.forEach(e => addEventListener(e, once, { passive: true }));
+    if (document.readyState === 'complete') arm(); else addEventListener('load', arm, { once: true });
   }());
 
   if (location.hash) followHash();

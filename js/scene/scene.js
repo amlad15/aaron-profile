@@ -43,6 +43,7 @@ export async function start({ canvas, isChart }) {
   let reduced = reducedMQ.matches;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: !lite, powerPreference: lite ? 'low-power' : 'high-performance' });
+  renderer.debug.checkShaderErrors = location.hostname === 'localhost';   // status queries are synchronous: only pay for them while developing
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, lite ? 1 : 1.5));
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace;   // with colour management off this is a pass-through
   const size = () => [canvas.clientWidth || innerWidth, canvas.clientHeight || innerHeight];
@@ -315,13 +316,19 @@ export async function start({ canvas, isChart }) {
   function draw() {
     if (composer && !chart) composer.render(); else renderer.render(scene, camera);
   }
-  // Budget ~8ms/frame so a mid-range laptop holds 60fps: shed bloom first, then resolution
-  function adaptQuality() {
-    if (composer && !chart && gpuMs(renderer, draw) > 8) { composer = null; }
-    if (!lite && gpuMs(renderer, draw) > 8 && renderer.getPixelRatio() > 1) {
-      renderer.setPixelRatio(1); resize();
-      starMats.forEach(m => { m.uniforms.uPR.value = 1; });
-    }
+  // Adaptive quality from real frame intervals (no blocking GPU sync): if the first ~40 active frames
+  // average under ~45fps, shed bloom; if still slow, drop to 1x resolution
+  const perf = { n: 0, sum: 0, step: 0 };
+  function samplePerf(dtMs) {
+    if (perf.step > 1 || dtMs > 200) return;                 // done adapting, or a stall (tab switch) that says nothing about the GPU
+    perf.n++; perf.sum += dtMs;
+    if (perf.n < 40) return;
+    const avg = perf.sum / perf.n;
+    perf.n = perf.sum = 0;
+    if (avg <= 22) { perf.step = 2; return; }                // fast enough: stop measuring
+    if (perf.step === 0 && composer) { composer = null; perf.step = 1; return; }
+    if (renderer.getPixelRatio() > 1) { renderer.setPixelRatio(1); resize(); starMats.forEach(m => { m.uniforms.uPR.value = 1; }); }
+    perf.step = 2;
   }
 
   /* ── Resize / layout changes ─────────────────────────────────────── */
@@ -364,6 +371,7 @@ export async function start({ canvas, isChart }) {
     if (moving || frameN % 2 === 0) {                         // settled: 30fps is plenty for orbits this slow
       updateWorld(dt); updateAccent(k, dt); place(k); draw();
       dirty = false;
+      if (moving) samplePerf(dt * 1000);                     // only frames rendered back to back say anything about speed
     }
     raf = requestAnimationFrame(loop);
   }
@@ -393,24 +401,16 @@ export async function start({ canvas, isChart }) {
   if (reduced) k = Math.round(k);
   updateWorld(0); updateAccent(k, 0); place(k);
   if (renderer.extensions.has('KHR_parallel_shader_compile')) await renderer.compileAsync(scene, camera);   // compile off the main thread where the GPU allows
-  else renderer.compile(scene, camera);                     // otherwise compile once now (compileAsync would only warn)
+  else {
+    for (const o of [...scene.children]) { renderer.compile(o, camera, scene); await yieldToBrowser(); }   // no parallel compile: one object per idle slice
+  }
   draw();
-  adaptQuality();
   canvas.classList.add('is-ready');                          // CSS fades the canvas in over the static starfield
   poke();
   return { bodies };
 }
 
 /* ── Helpers ───────────────────────────────────────────────────────── */
-// Time a few frames to completion (readPixels forces the GPU to finish), so the cost is measured, not guessed
-function gpuMs(renderer, draw, n = 6) {
-  const gl = renderer.getContext(), px = new Uint8Array(4);
-  draw(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
-  const t0 = performance.now();
-  for (let i = 0; i < n; i++) draw();
-  gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
-  return (performance.now() - t0) / n;
-}
 
 export function planetMaterial(style, colors, seed, bump, octaves, U) {
   return new THREE.ShaderMaterial({

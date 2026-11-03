@@ -84,8 +84,8 @@ one planet per section, and the camera eases toward it every frame. Native scrol
 - **Rendering:** three.js 0.186.1 as ES modules via the import map in `index.html` (jsDelivr, pinned). Surfaces are
   procedural GLSL (3D simplex noise + fbm, Ashima Arts / Stefan Gustavson, MIT). No textures are shipped.
 - **Light theme:** the scene switches to an ink-on-paper "star chart" (contours, hatching, graticule) rather than an inverted dark render.
-- **Performance:** built after `load` + idle so it never affects first paint. DPR capped (1.5 desktop, 1 mobile), fewer
+- **Performance:** loaded on the first interaction after `load` (scroll, pointer, key, touch), so it never competes with loading. DPR capped (1.5 desktop, 1 mobile), fewer
   octaves/segments/stars on phones, renders at ~30fps once the camera settles, pauses when the tab is hidden.
-  On start it times a few frames and drops bloom, then resolution, if the GPU can't hold ~8ms/frame.
+  It samples its first ~40 frames and drops bloom, then resolution, if they average under ~45fps.
 - **Fallbacks:** reduced motion shows one still per section with a cross-fade. With JS off, or without WebGL2 (required by
   current three.js), a static CSS starfield is shown instead. The content works the same either way.
